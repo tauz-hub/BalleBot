@@ -1,0 +1,2 @@
+# BalleBot
+Ballerini server bot
