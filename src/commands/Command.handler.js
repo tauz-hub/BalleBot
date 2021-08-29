@@ -29,13 +29,11 @@ function genCommand(folder, returnCollection) {
             if (command.aliases) {
                 command.aliases.map((alias) => {
                     returnCollection.set(alias.toLowerCase(), command)
-                        //console.log(returnCollection)
                 })
             }
             command.name = command.name.toLowerCase()
             returnCollection.set(command.name, command);
             setCommandsInDatabase(command);
-            //  console.log(returnCollection)
 
         } catch (e) {
             console.log("error:", name, e)
