@@ -9,7 +9,7 @@ export default {
     once: false,
     run: (client, message) => {
         if (message.channel.type === 'dm') return
-        console.log(message.content + 'user : ' + message.author.username)
+        
         if (!message.author.bot) {
             if (verifyBannedWords(client, message)) {
                 return
@@ -30,7 +30,6 @@ export default {
                     return;
                 }
             }
-
             if (rolesPermissions === null) {
                 message.channel.send(message.author, new Discord.MessageEmbed()
                     .setColor('#ff8997')
@@ -44,13 +43,13 @@ export default {
                     \n#setAdm @cargoPadawan @cargoModeradores @cargoStaff `));
                 return;
             }
+            
             try {
                 rolesPermissions.owner = message.guild.ownerID;
                 console.log(rolesPermissions)
 
                 const commandToBeExecuted = client.Commands.get(commandName)
                 if (commandToBeExecuted) {
-
 
                     let rolesUser = [],
                         userHasPermission = false,
