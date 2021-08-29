@@ -2,19 +2,19 @@ import Discord from 'discord.js'
 import { prefix } from '../../assets/prefix.js'
 import db from 'quick.db'
 
-const permissionsDatabase = new db.table('permissionsDatabase')
-
 export default {
     name: 'setAdm',
     description: `Para adionar os cargos de administração use ${prefix}addRolesAdm <idPadawan> <idModeradores> <idStaff>`,
     permissions: ['owner'],
     aliases: ['addAdm', 'addRolesAdm'],
+    category: '🗡️ Owner',
     run: ({ message, client, args }) => {
+        const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
 
         function messageErro() {
             message.channel.send(message.author, new Discord.MessageEmbed()
                 .setColor('#ff8997')
-                .setThumbnail('https://i.imgur.com/3Xto09h.png')
+                .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                 .setTitle(`Os Cargos Administrativos não foram encontrados!:`)
                 .setDescription(`**Desculpa, mas não encontrei os cargos marcados.**
                 \n**•** Mande no seguinte esquema (o nome do cargo pode ser qualquer um):
@@ -49,11 +49,11 @@ export default {
             mods: loadsToBeConsidered[1],
             staff: loadsToBeConsidered[2]
         }
-        permissionsDatabase.set(`${message.guild.id}`, permissionIDs)
+        guildIdDatabase.set('permissionAdmIds', permissionIDs)
 
         message.channel.send(message.author, new Discord.MessageEmbed()
             .setColor('#ff8997')
-            .setThumbnail('https://i.imgur.com/oKLZb0T.png')
+            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
             .setTitle(`Os Cargos Administrativos foram setados!:`)
             .setDescription(
                 '**• Esses são os cargos que foram setados:**' +

@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-import { prefix } from '../../assets/prefix.js'
+import { prefix } from '../../../assets/prefix.js'
 
 export default {
     name: 'addRole',
@@ -7,6 +7,6 @@ export default {
     permissions: ['mods'],
     aliases: ['addroles'],
     run: ({ message, client }) => {
-
+        //TODO bot de cargos e reações
     }
 };

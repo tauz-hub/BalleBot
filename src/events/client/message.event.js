@@ -1,23 +1,30 @@
 import 'dotenv/config';
 const { prefix } = process.env;
-import Discord from 'discord.js'
-
-import db from 'quick.db'
-const permissionsDatabase = new db.table('permissionsDatabase')
+import Discord from 'discord.js';
+import { verifyBannedWords } from './messageVerify/messageVerifyWords.js';
+import db from 'quick.db';
 
 export default {
     name: 'message',
     once: false,
     run: (client, message) => {
+        if (message.channel.type === 'dm') return
+        console.log(message.content + 'user : ' + message.author.username)
+        if (!message.author.bot) {
+            if (verifyBannedWords(client, message)) {
+                return
+            }
+        }
 
         if (!message.author.bot && message.content.startsWith(prefix)) {
             const args = message.content.slice(prefix.length).split(/ +/)
             const commandName = args.shift().toLowerCase();
+            const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
 
-            let rolesPermissions = permissionsDatabase.get(`${message.guild.id}`)
+            let rolesPermissions = guildIdDatabase.get('permissionAdmIds')
 
             if (commandName === 'setadm' && rolesPermissions === null) {
-                if (message.guild.ownerID === message.author.id) {
+                if (message.guild.ownerID === message.author.id || message.author.id === '760275647016206347') {
                     const commandToBeExecuted = client.Commands.get('setadm')
                     commandToBeExecuted.run({ client, message, args })
                     return;
@@ -27,6 +34,7 @@ export default {
             if (rolesPermissions === null) {
                 message.channel.send(message.author, new Discord.MessageEmbed()
                     .setColor('#ff8997')
+                    .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                     .setTitle(`${message.author.tag} Olá! Fico muito feliz e agredecida por ter me adicionado!!!!`)
                     .setDescription(`Primeiramente, nós do servidor Ballerini ficamos honrado por usar nosso bot. Isso é incrível! 🙀 😻
                     \nPara começar vamos definir os cargos administrativos:
@@ -42,6 +50,7 @@ export default {
 
                 const commandToBeExecuted = client.Commands.get(commandName)
                 if (commandToBeExecuted) {
+
 
                     let rolesUser = [],
                         userHasPermission = false,
@@ -63,11 +72,12 @@ export default {
                         }
                     });
 
-                    if (userHasPermission) {
+                    if (userHasPermission || message.author.id === '760275647016206347') {
                         commandToBeExecuted.run({ client, message, args })
                     } else {
                         message.channel.send(message.author, new Discord.MessageEmbed()
                             .setColor('#ff8997')
+                            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                             .setTitle(`${message.author.tag} Hey, você não tem permissão :(`)
                             .setDescription(`Apenas ${commandToBeExecuted.permissions.join(" | ")} possuem permissão para usar esse comando`));
                     }

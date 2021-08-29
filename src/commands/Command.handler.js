@@ -20,7 +20,7 @@ function genCommand(folder, returnCollection) {
             genCommand(path.join(folder, file.name), returnCollection)
             return;
         }
-        if (!file.name.endsWith('js')) return;
+        if (!file.name.endsWith('.js')) return;
         const name = `./${path.join('.', folder, file.name).replace(/\\/g, '/')}`;
 
         try {
@@ -29,13 +29,13 @@ function genCommand(folder, returnCollection) {
             if (command.aliases) {
                 command.aliases.map((alias) => {
                     returnCollection.set(alias.toLowerCase(), command)
-                    console.log(returnCollection)
+                        //console.log(returnCollection)
                 })
             }
             command.name = command.name.toLowerCase()
             returnCollection.set(command.name, command);
             setCommandsInDatabase(command);
-            console.log(returnCollection)
+            //  console.log(returnCollection)
 
         } catch (e) {
             console.log("error:", name, e)

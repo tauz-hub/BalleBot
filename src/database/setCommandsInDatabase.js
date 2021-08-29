@@ -6,10 +6,10 @@ export function setCommandsInDatabase(command) {
     //console.log(command)
     const nameCommand = command.name;
     // delete command.name
-    const dataCommand = JSON.stringify(command)
+
 
     //console.log(dataCommand)
-    commandsDatabase.set(`${nameCommand}`, `${dataCommand}`)
+    commandsDatabase.set(`${nameCommand}`, command)
 
     // let allCommands = commandsDatabase.all()
 }
