@@ -7,7 +7,7 @@ export default {
     description: `${prefix}words para ver mensagens proibidas no servidor`,
     permissions: ['mods'],
     aliases: ['viewwords', 'words?'],
-    category: '❌ AntiSpam',
+    category: 'AntiSpam ⚠️',
     run: ({ message, client, args }) => {
         const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
 
@@ -19,7 +19,7 @@ export default {
 
             message.channel.send(message.author, new Discord.MessageEmbed()
                 .setColor('#ff8997')
-                .setTitle(`${message.author.tag} Aqui está todas as palavras do banco de dados: ☑️`)
+                .setTitle(`${message.author.tag} Aqui está todas as palavras do banco de dados: `)
                 .setDescription('```' + listOfWords.join(' | ') + '```')
                 .setThumbnail(client.user.displayAvatarURL({ dynamic: true })))
         } else {

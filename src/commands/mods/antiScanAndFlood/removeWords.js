@@ -7,7 +7,7 @@ export default {
     description: `${prefix}removewords para remover palavras proibidas no servidor`,
     permissions: ['mods'],
     aliases: ['rmvwords'],
-    category: '❌ AntiSpam',
+    category: 'AntiSpam ⚠️',
     run: ({ message, client, args }) => {
         let deleteRegexList = [];
         const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
@@ -29,7 +29,7 @@ export default {
             message.channel.send(message.author, new Discord.MessageEmbed()
                 .setColor('#ff8997')
                 .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                .setTitle(`${message.author.tag} As Palavras ou Links foram removidos do banco com sucesso! ☑️`)
+                .setTitle(`${message.author.tag} As Palavras ou Links foram removidos do banco com sucesso! `)
                 .setDescription('**Essas foram as palavras ou links removidos:** \n' + '```' + deleteRegexList.join(' | ') + '```'))
         } else {
             message.channel.send(message.author, new Discord.MessageEmbed()

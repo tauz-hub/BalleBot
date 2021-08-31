@@ -3,7 +3,7 @@ export default {
     once: false,
     run: (client, dataRaw) => {
         if (dataRaw.t !== "MESSAGE_REACTION_ADD" && dataRaw.t !== "MESSAGE_REACTION_REMOVE") return;
-        //TODO futura verificação da reação para os cargos
+
 
     }
 }

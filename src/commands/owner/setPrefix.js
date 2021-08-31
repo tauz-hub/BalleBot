@@ -6,7 +6,7 @@ export default {
     description: `comando setar um prefixo customizado para seu servidor, para isso use ${prefix}setPrefix <prefix>`,
     permissions: ['everyone'],
     aliases: ['prefix'],
-    category: '✨ Acessórios',
+    category: 'Acessórios ✨',
     run: ({ message, client }) => {
 
     }

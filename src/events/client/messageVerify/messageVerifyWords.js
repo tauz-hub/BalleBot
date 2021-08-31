@@ -3,6 +3,8 @@ import { messageWarnAndMute } from './messageWarnAndMute.js'
 
 export function verifyBannedWords(client, message) {
     if (message.channel.type === 'dm') return
+
+
     const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
 
     let rolesUser = [],
@@ -12,8 +14,8 @@ export function verifyBannedWords(client, message) {
 
     member.roles.cache.map(role => rolesUser.push(role.id))
 
-    if (guildIdDatabase.has('permissionAdmIds')) {
-        let rolesPermissions = guildIdDatabase.get('permissionAdmIds')
+    if (guildIdDatabase.has('admIds')) {
+        let rolesPermissions = guildIdDatabase.get('admIds')
 
         for (let i = 0; i < rolesUser.length; i++) {
             if (rolesPermissions.mods === rolesUser[i] || rolesPermissions.staff === rolesUser[i] || message.guild.ownerID === rolesUser[i]) {

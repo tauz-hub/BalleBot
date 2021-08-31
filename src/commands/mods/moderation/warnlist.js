@@ -1,24 +1,53 @@
 import Discord from 'discord.js'
 import { prefix } from '../../../assets/prefix.js'
 import db from 'quick.db'
-
-const channelLogGuildReport = new db.table('channelLogGuildReport')
+import { getUserOfCommand } from '../../../../utils/getUserMention/getUserOfCommand.js'
 
 export default {
     name: 'warnlist',
-    description: `${prefix}warnlist para adicionar o chat de report do bot`,
+    description: `${prefix}warnlist @user ou ${prefix}warnlist <tagUser> ou ${prefix}warnlist <idUser> para adicionar o chat de report do bot`,
     permissions: ['everyone'],
     aliases: ['warns'],
-    category: '⚔️ moderação',
+    category: 'Moderação ⚔️',
     run: ({ message, client, args }) => {
 
         const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
 
-        let relatorioUser = guildIdDatabase.get(`user_id_${message.author.id}`)
-        let envite = JSON.stringify(relatorioUser)
+        const { user } = getUserOfCommand(client, message)
 
-        console.log(relatorioUser)
-        message.channel.send(message.author + `${envite}`)
+        if (!user) {
+            message.channel.send(message.author, new Discord.MessageEmbed()
+                .setColor('#ff8997')
+                .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+                .setTitle(`Não encontrei o usuário!`)
+                .setDescription(`**Tente usar**` + '```' + `${prefix}warnlist @usuário` + '```')
+                .setTimestamp())
+            return
+        }
 
+        console.log({ user })
+        if (guildIdDatabase.has(`user_id_${user.id}`)) {
+            let myUser = guildIdDatabase.get(`user_id_${user.id}`)
+
+            let warnUser = myUser.reasons
+
+            if (warnUser) {
+                function getMessageCommands() {
+                    return warnUser.reduce((prev, arr, index) => {
+                        return prev + `**Aviso ${index+1}:** \n ${warnUser[index]}\n\n`
+                    }, '');
+                }
+                message.channel.send(message.author, new Discord.MessageEmbed()
+                    .setColor('#ff8997')
+                    .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+                    .setTitle(`Lista de warns do usuário ${myUser.name + '#' + myUser.discriminator}`)
+                    .setDescription(` ${getMessageCommands()}`))
+
+            } else {
+                message.channel.send('usuário não encontrado no banco')
+            }
+        } else {
+            message.channel.send('usuário não encontrado no banco')
+        }
     }
 }

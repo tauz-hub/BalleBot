@@ -8,7 +8,7 @@ export default {
     description: `${prefix}words para ver mensagens proibidas no servidor`,
     permissions: ['mods'],
     aliases: ['setwords'],
-    category: '❌ AntiSpam',
+    category: 'AntiSpam ⚠️',
     run: ({ message, client, args }) => {
 
 

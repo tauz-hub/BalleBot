@@ -7,7 +7,5 @@ export default {
     run: (client) => {
         statusActivity(client);
         console.log(`Logged as ${client.user.tag}`);
-        console.log(`${client.user.id}`)
-
     },
 };

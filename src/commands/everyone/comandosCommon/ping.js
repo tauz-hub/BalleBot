@@ -6,7 +6,7 @@ export default {
     description: `comando de ping para saber a latência, para usar digite ${prefix}ping`,
     permissions: ['everyone'],
     aliases: ['pong', 'peng'],
-    category: '⛏️ Utility',
+    category: 'Utility ⛏️',
     run: ({ message, client }) => {
 
         message.channel.send("Loading").then(msg => {

@@ -28,7 +28,7 @@ export function messageWarnAndMute(message, client, messageMarked) {
     if (guildIdDatabase.has(`user_id_${message.author.id}`)) {
         guildIdDatabase.set(`user_id_${message.author.id}.name`, message.author.username)
         guildIdDatabase.set(`user_id_${message.author.id}.discriminator`, message.author.discriminator)
-        guildIdDatabase.set(`user_id_${message.author.id}.warns`, 1)
+        guildIdDatabase.add(`user_id_${message.author.id}.warnsCount`, 1)
         guildIdDatabase.push(`user_id_${message.author.id}.reasons`, `Palavra/Link proibido : ${messageMarked}`)
 
     } else {
@@ -36,7 +36,7 @@ export function messageWarnAndMute(message, client, messageMarked) {
             name: message.author.username,
             discriminator: message.author.discriminator,
             id: message.author.id,
-            warns: 1,
+            warnsCount: 1,
             reasons: [`Palavra/Link proibido : ${messageMarked}`]
         })
     }
@@ -58,10 +58,10 @@ export function messageWarnAndMute(message, client, messageMarked) {
             console.log(`usuário do servidor ${message.guild.name} enviou uma mensagem suspeita e não existe channel log`)
         }
 
-        messageDmAlert(message)
+        messageDmAlert()
 
     } else {
-        messageDmAlert(message)
+        messageDmAlert()
         return
     }
 }
