@@ -1,16 +1,21 @@
 import 'dotenv/config';
+// import './services/database/connection.js';
 import { Client } from 'discord.js';
+import db from 'quick.db';
 
-const { token } = process.env;
+import eventHandler from './events/Events.handler.js';
+import commandHandler from './commands/Command.handler.js';
+import reactionHandler from './reactionAdd/Reaction.handler.js';
 
-import EventHandler from './events/Events.handler.js';
-import CommandHandler from './commands/Command.handler.js';
+const { TOKEN } = process.env;
 
 const client = new Client({
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'USERS', 'GUILD_MEMBER'],
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'USERS', 'GUILD_MEMBER'],
 });
 
-client.Events = EventHandler(client);
-client.Commands = CommandHandler();
+client.Events = eventHandler(client);
+client.Commands = commandHandler();
+client.Reactions = reactionHandler();
+client.Database = db;
 
-client.login(token);
+client.login(TOKEN);

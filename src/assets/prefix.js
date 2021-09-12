@@ -1,2 +1,1 @@
-import 'dotenv/config'
-export const { prefix } = process.env;
+export const { PREFIX: prefix } = process.env;

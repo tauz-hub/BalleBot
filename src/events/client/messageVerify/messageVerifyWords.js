@@ -1,64 +1,46 @@
-import db from 'quick.db'
-import { messageWarnAndMute } from './messageWarnAndMute.js'
+import { messageWarnAndMute } from './messageWarnAndMute.js';
 
 export function verifyBannedWords(client, message) {
-    if (message.channel.type === 'dm') return
+  if (message.channel.type === 'dm') return;
 
+  const guildIdDatabase = new client.Database.table(
+    `guild_id_${message.guild.id}`
+  );
 
-    const guildIdDatabase = new db.table(`guild_id_${message.guild.id}`)
+  const rolesUser = [];
 
-    let rolesUser = [],
-        userHasPermission = false,
-        serverMember = client.guilds.cache.get(message.guild.id),
-        member = serverMember.members.cache.get(message.author.id);
+  const server = client.guilds.cache.get(message.guild.id);
+  const member = server.members.cache.get(message.author.id);
 
-    member.roles.cache.map(role => rolesUser.push(role.id))
+  member.roles.cache.map((role) => rolesUser.push(role.id));
 
-    if (guildIdDatabase.has('admIds')) {
-        let rolesPermissions = guildIdDatabase.get('admIds')
+  if (guildIdDatabase.has('admIds')) {
+    const rolesPermissions = guildIdDatabase.get('admIds');
 
-        for (let i = 0; i < rolesUser.length; i++) {
-            if (rolesPermissions.mods === rolesUser[i] || rolesPermissions.staff === rolesUser[i] || message.guild.ownerID === rolesUser[i]) {
-                userHasPermission = true;
-            }
+    const userHasPermission =
+      rolesUser.includes(rolesPermissions.mods) ||
+      rolesUser.includes(rolesPermissions.staff) ||
+      rolesUser.includes(rolesPermissions.padawan) ||
+      message.guild.ownerID === message.author.id;
+
+    if (!userHasPermission && guildIdDatabase.has('wordsBanned')) {
+      const wordsBannedGuild = guildIdDatabase.get('wordsBanned');
+
+      const messageLowerCase = message.content.toLowerCase();
+
+      if (wordsBannedGuild.length !== 0) {
+        const wordsRegex = new RegExp(
+          wordsBannedGuild.filter((word) => word).join('|'),
+          'g'
+        );
+
+        if (wordsRegex.test(messageLowerCase)) {
+          const messageMarked = messageLowerCase.replace(wordsRegex, '**$&**');
+          messageWarnAndMute(message, client, messageMarked);
+          return true;
         }
-
-        if (!userHasPermission) {
-            const userMessage = message.content.toLowerCase()
-            if (guildIdDatabase.has('wordsBanned')) {
-                let wordsBannedGuild = guildIdDatabase.get('wordsBanned')
-                    //  if (!wordsBannedGuild) return false;
-                let listRegex = [],
-                    messageMarked = message.content,
-                    wordsInMessage = [];
-
-                if (wordsBannedGuild.length !== 0) {
-                    wordsBannedGuild.map(myWord => {
-                        if (myWord !== null) {
-                            listRegex.push(new RegExp(myWord));
-                        }
-                    })
-                    let warnAlert = false;
-
-                    listRegex.some(rx => {
-                        rx.test(userMessage)
-                        if (rx.test(userMessage)) {
-                            warnAlert = true;
-                            console.log(rx)
-                            wordsInMessage.push(rx)
-                            const rxString = rx.toString().replace(/\//g, '')
-                            messageMarked = messageMarked.replace(rx, `**${rxString}**`)
-                        }
-                    })
-
-                    if (warnAlert) {
-                        messageWarnAndMute(message, client, messageMarked)
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            } else { return false }
-        } else { return false }
+      }
     }
+  }
+  return false;
 }
