@@ -3,6 +3,7 @@ import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { parseDateForDiscord } from '../../../utils/TimeMessageConversor/parseDateForDiscord.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'warnlist',
@@ -13,7 +14,7 @@ export default {
   run: ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     const guildIdDatabase = new client.Database.table(
@@ -27,7 +28,7 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
@@ -57,7 +58,7 @@ export default {
         message.channel.send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
             .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
             .setTitle(`Lista de warns do usuário: `)

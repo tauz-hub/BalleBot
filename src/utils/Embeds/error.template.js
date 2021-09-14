@@ -1,9 +1,10 @@
 import { MessageEmbed } from 'discord.js';
 import { prefix } from '../../assets/prefix.js';
+import Colors from '../layoutEmbed/colors.js';
 
 export function messageErro(client) {
   return new MessageEmbed()
-    .setColor('#ff8997')
+    .setColor(Colors.pink_red)
     .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
     .setTitle(`Os Cargos Administrativos não foram encontrados!:`)
     .setDescription(

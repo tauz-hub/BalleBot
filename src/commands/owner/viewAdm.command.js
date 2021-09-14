@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import { prefix } from '../../assets/prefix.js';
+import Colors from '../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'viewAdm',
@@ -23,7 +24,7 @@ export default {
     message.channel.send(
       message.author,
       new Discord.MessageEmbed()
-        .setColor('#ff8997')
+        .setColor(Colors.pink_red)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setTitle(`Esses são os cargos Administrativos:`)
         .setTimestamp()

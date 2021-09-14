@@ -1,6 +1,7 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
-import Icons from '../../../utils/icons/iconsMessage.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 function getMessageCommands(listTempleteCategories, namesCategories) {
   return listTempleteCategories.reduce((prev, _arr, index) => {
@@ -12,7 +13,7 @@ function getMessageCommands(listTempleteCategories, namesCategories) {
   }, '');
 }
 
-export function helpWithASpecificCommand(fullCommand, message, client) {
+export function helpWithASpecificCommand(fullCommand, message) {
   const markedAliases = [];
   const markedPermissions = [];
 
@@ -26,33 +27,32 @@ export function helpWithASpecificCommand(fullCommand, message, client) {
   }
 
   const { category, description } = fullCommand;
-  message.channel
-    .send(
-      message.author,
-      new Discord.MessageEmbed()
-        .setColor('#ff8997')
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setTitle(
-          `Informações sobre o comando \`${prefix}${fullCommand.name}\`:`
-        )
-        .setDescription(
-          `**• Categoria: ${category || 'Sem Categoria'}**
-    \n**• Como usar:**\n\`\` ${description}\`\` \n**• Cargos necessários para usá-lo: **\n${markedPermissions.join(
-            ' | '
-          )}\n**• Sinônimos: **\n${
-            markedAliases.join('**|**') ||
-            '`<Este comando não possui sinônimos>`'
-          }`
-        )
-    )
-    .then((msg) => msg.delete({ timeout: 15000 }));
+  message.channel.send(
+    message.author,
+    new Discord.MessageEmbed()
+      .setColor(Colors.pink_red)
+      .setThumbnail(Icons.interrogation)
+      .setTitle(`Informações sobre o comando \`${fullCommand.name}\`:`)
+      .setDescription(
+        `**📝 Categoria: ${
+          category || 'Sem Categoria'
+        }**\n\n**Sobre o Comando:**\n> \`\`${
+          description || `Não especificado`
+        }\`\`\n**Cargos necessários para utilizar o comando: **\n> ${
+          markedPermissions.join(' | ') || '`Não especificado`'
+        }\n**Sinônimos: **\n> ${
+          markedAliases.join(' **|** ') ||
+          '`<Este comando não possui sinônimos>`'
+        }`
+      )
+  );
 }
 
 export default {
   name: 'help',
   description: `${prefix}help <comando> `,
   permissions: ['everyone'],
-  aliases: ['help2', 'help3'],
+  aliases: ['ajuda', 'h'],
   category: 'Utility ⛏️',
   run: ({ message, client, args }) => {
     const commandsDatabase = new client.Database.table('commandsDatabase');
@@ -98,16 +98,27 @@ export default {
       message.channel.send(
         message.author,
         new Discord.MessageEmbed()
-          .setColor('#ff8997')
+          .setColor(Colors.pink_red)
           .setAuthor(
             'Balle Bot • Ballerini',
             client.user.displayAvatarURL({ dynamic: true }),
             'https://discord.gg/ballerini'
           )
-          .setThumbnail(Icons.interrogation)
+          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
           .setTitle(`Ajuda Sobre Comandos e Funções:`)
           .setDescription(
-            `**Essas são as categorias e comandos que podem ser usados: **\n\n${getMessageCommands(
+            `
+            Hey ${
+              message.author
+            }, muito prazer! eu sou a Bot do servidor Ballerini (pode me chamar de Balle).\n
+            Fui criada para várias funções dentro de um servidor,\n
+            Entre elas: Moderação, Cargos, AntiSpam, Forbidden Words, Welcome, Eventos Especiais, Diversão, Economia, e muito mais!\n
+            Meus criadores me criaram para ser um bot completo com praticamente tudo que é necessário para um servidor e um pouquinho a mais,
+            trazendo segurança e diversão para o seu servidor\n
+            Caso queira suporte com nossos desenvolvedores entre em contato com a equipe responsável no servidor Ballerini:\n
+            > **Ballerini:** https://discord.gg/ballerini \n
+
+            **Essas são as categorias e comandos que podem ser usados: **\n\n${getMessageCommands(
               listTempleteCategories,
               namesCategories
             )}`
@@ -119,6 +130,6 @@ export default {
 
       return;
     }
-    helpWithASpecificCommand(fullCommand, message, client);
+    helpWithASpecificCommand(fullCommand, message);
   },
 };

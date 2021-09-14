@@ -1,5 +1,7 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'addwords',
@@ -22,14 +24,19 @@ export default {
       message.channel.send(
         message.author,
         new Discord.MessageEmbed()
-          .setColor('#ff8997')
-          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.chat)
           .setTitle(
-            `${message.author.tag}O seu servidor não possui um chat log para usar esse recurso!`
+            `O seu servidor não possui um chat log para usar esse recurso!`
           )
           .setDescription(
-            `**use ${prefix}addlog <#chat> para setar o canal de configurações**`
+            `> Use **${prefix}addlog <#chat/ID>** para adicionar o canal de **configurações**!`
           )
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
+          )
+          .setTimestamp()
       );
       return;
     }
@@ -38,16 +45,21 @@ export default {
       message.channel.send(
         message.author,
         new Discord.MessageEmbed()
-          .setColor('#ff8997')
-          .setThumbnail('https://i.imgur.com/3TiZboO.png')
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.addwords)
           .setTitle(
-            `${message.author.tag} As Palavras ou Links foram adicionados ao banco com sucesso!`
+            `As Palavras ou Links foram **adicionados** ao banco com sucesso!`
           )
           .setDescription(
-            `**Essas foram as palavras ou links adicionados:** \n \`\`\`${args.join(
-              ' | '
-            )}\`\`\``
+            `**Essas foram as palavras ou links adicionados:** \n> ${args.join(
+              ' **|** '
+            )}`
           )
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
+          )
+          .setTimestamp()
       );
     }
     if (guildIdDatabase.has('wordsBanned')) {
@@ -63,11 +75,9 @@ export default {
 
       for (let j = 0; j < listRegexInDatabase.length; j++) {
         if (listRegexInDatabase[j] === null) {
-          try {
+          if (setRegexList[position]) {
             guildIdDatabase.set(`wordsBanned.${j}`, setRegexList[position]);
             position++;
-          } catch (e) {
-            console.error(e);
           }
         }
       }

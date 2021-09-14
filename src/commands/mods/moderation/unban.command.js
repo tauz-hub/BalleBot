@@ -1,6 +1,7 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'unban',
@@ -11,7 +12,7 @@ export default {
   run: async ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     const ban = await message.guild.fetchBans();
@@ -25,7 +26,7 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(`**Tente usar**\`\`\`${prefix}unban <idUser>\`\`\``)
@@ -46,7 +47,7 @@ export default {
               member.displayAvatarURL({ dynamic: true })
             )
             .setThumbnail(member.displayAvatarURL({ dynamic: true }))
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
         )
         .then((msg) => msg.delete({ timeout: 15000 }));
 
@@ -60,7 +61,7 @@ export default {
             'Você não tem permissão de desbanir usuário, fale com um administrador'
           )
           .setThumbnail(member.displayAvatarURL({ dynamic: true }))
-          .setColor('#ff8997')
+          .setColor(Colors.pink_red)
       );
 
       return;
@@ -73,7 +74,7 @@ export default {
         .setTitle(`O usuário foi desbanido com sucesso!`)
         .setAuthor(`${member.tag}`, member.displayAvatarURL({ dynamic: true }))
         .setThumbnail('https://i.imgur.com/5RlHK76.png')
-        .setColor('#ff8997');
+        .setColor(Colors.pink_red);
     }
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`

@@ -2,6 +2,8 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'addLog',
@@ -12,7 +14,7 @@ export default {
   run: ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     const guildIdDatabase = new client.Database.table(
@@ -23,7 +25,21 @@ export default {
 
     const channel = client.channels.cache.get(args[0]);
     if (!channel) {
-      message.channel.send('canal não existe');
+      message.channel.send(
+        message.author,
+        new Discord.MessageEmbed()
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.erro)
+          .setTitle('**Não encontrei o chat!**')
+          .setDescription(
+            '> Tente mencionar o chat com **#chat** ou use o **ID** do chat para adicionar e receber notificações sobre configurações, banimentos, avisos e muito mais!'
+          )
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
+          )
+          .setTimestamp()
+      );
       return;
     }
     guildIdDatabase.set('channel_log', args[0]);
@@ -31,12 +47,16 @@ export default {
     message.channel.send(
       message.author,
       new Discord.MessageEmbed()
-        .setColor('#ff8997')
-        .setThumbnail('https://i.imgur.com/gfDpssU.png')
-        .setTitle(
-          `${message.author.tag} O Chat Log foi atualizado com sucesso: `
+        .setColor(Colors.pink_red)
+        .setThumbnail(Icons.sucess)
+        .setTitle(`O Chat Log foi atualizado com sucesso: `)
+        .setDescription(
+          `Caso queira modificar basta usar o comando novamente com **outro chat!**\n> **Chat setado:** ${channel}`
         )
-        .setDescription(`Chat setado: ${channel}`)
+        .setFooter(
+          `${message.author.tag}`,
+          `${message.author.displayAvatarURL({ dynamic: true })}`
+        )
     );
   },
 };

@@ -10,14 +10,16 @@ export default {
   run: ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
     }
-    // NOT IMPLEMENTED
-    // const guildIdDatabase = new client.Database.table(
-    //    `guild_id_${message.guild.id}`
-    // );
 
-    // guildIdDatabase.set('guildPrefixDatabase', args[0]);
-    // message.channel.send('prefix setado com sucesso');
+    const guildIdDatabase = new client.Database.table(
+      `guild_id_${message.guild.id}`
+    );
+
+    guildIdDatabase.set('prefix', args[0]);
+    message.channel.send(
+      `prefix foi setado: \`${args[0]}\`\n obs: o bot ainda não funciona com o prefix do servidor`
+    );
   },
 };

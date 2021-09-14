@@ -3,7 +3,8 @@ import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { confirmMessage } from './confirmMessage.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
-import Icons from '../../../utils/icons/iconsMessage.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'ban',
@@ -15,7 +16,7 @@ export default {
   run: async ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
 
@@ -26,11 +27,15 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
-            .setThumbnail(Icons.broken_sledgehammer)
+            .setColor(Colors.pink_red)
+            .setThumbnail(Icons.erro)
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
               `**Tente usar**\`\`\`${prefix}ban @usuário <motivo>\`\`\``
+            )
+            .setFooter(
+              `${message.author.tag}`,
+              `${message.author.displayAvatarURL({ dynamic: true })}`
             )
             .setTimestamp()
         )
@@ -42,7 +47,8 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
+            .setThumbnail(Icons.erro)
             .setTitle(`Hey, você não pode me banir e isso não é legal :(`)
             .setTimestamp()
         )
@@ -57,12 +63,12 @@ export default {
 
     const messageAnt = await message.channel.send(
       new Discord.MessageEmbed()
-        .setColor('#FF0000')
+        .setColor(Colors.red)
         .setThumbnail(Icons.sledgehammer)
         .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
         .setTitle(`Você está prestes a Banir um usuário!`)
         .setDescription(
-          `**Pelo Motivo de : **\n\n\`\`\`${reason}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
+          `**Pelo Motivo de:**\n\n\`\`\`${reason}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
         )
         .setFooter(`ID do usuário: ${user.id}`)
         .setTimestamp()
@@ -81,8 +87,8 @@ export default {
           .send(
             message.author,
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
-              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setColor(Colors.pink_red)
+              .setThumbnail(Icons.erro)
               .setTitle(`Eu não tenho permissão para banir o usuário`)
               .setDescription(
                 `O usuário ${user} tem um cargo acima ou igual a mim, eleve meu cargo acima do dele`
@@ -95,14 +101,18 @@ export default {
           .send(
             message.author,
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
-              .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+              .setColor(Colors.pink_red)
+              .setThumbnail(Icons.erro)
               .setDescription(
                 `Ative a permissão de banir para mim, para que você possa usar o comando`
               )
               .setTitle(`Eu não tenho permissão para banir usuários`)
               .setFooter(
                 `A permissão pode ser ativada no cargo do bot em configurações`
+              )
+              .setFooter(
+                `${message.author.tag}`,
+                `${message.author.displayAvatarURL({ dynamic: true })}`
               )
               .setTimestamp()
           )
@@ -116,11 +126,15 @@ export default {
           .send(
             message.author,
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
-              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setColor(Colors.pink_red)
+              .setThumbnail(Icons.erro)
               .setTitle(`Você não tem permissão para banir o usuário`)
               .setDescription(
-                `O usuário ${user} está acima ou no mesmo cargo que você, por isso não você não pode banir do servidor`
+                `O usuário ${user} está acima ou no mesmo cargo que você, por isso você não pode banir do servidor`
+              )
+              .setFooter(
+                `${message.author.tag}`,
+                `${message.author.displayAvatarURL({ dynamic: true })}`
               )
               .setTimestamp()
           )
@@ -137,10 +151,6 @@ export default {
               `guild_id_${message.guild.id}`
             );
 
-            const channelLog = client.channels.cache.get(
-              guildIdDatabase.get('channel_log')
-            );
-
             function messageForChannelLog() {
               const dateMessage = message.createdAt.toISOString();
               const dataConvert = parseInt(
@@ -150,15 +160,18 @@ export default {
               const dateForMessage = `<t:${dataConvert}:F>`;
 
               return new Discord.MessageEmbed()
-                .setColor('#ff8997')
-                .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+                .setColor(Colors.pink_red)
+                .setThumbnail(Icons.sucess)
                 .setTitle(`O usuário ${user.tag} foi banido!`)
                 .setDescription(
-                  `**Data: ${dateForMessage}**\n**Motivo: **\`\`\`${reason}\`\`\``
+                  `**Data: ${dateForMessage}**\n**Motivo: **\`\`\`${reason}\`\`\`\n**Author:${message.author}**`
                 )
                 .setFooter(`ID do usuário: ${user.id}`)
                 .setTimestamp();
             }
+            const channelLog = client.channels.cache.get(
+              guildIdDatabase.get('channel_log')
+            );
             if (channelLog) {
               channelLog.send(message.author, messageForChannelLog());
             } else {
@@ -170,7 +183,7 @@ export default {
             user
               .send(
                 new Discord.MessageEmbed()
-                  .setColor('#ff8997')
+                  .setColor(Colors.pink_red)
                   .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                   .setTitle(
                     `Você foi banido do servidor **${message.guild.name}**`
@@ -186,8 +199,8 @@ export default {
                   .send(
                     message.author,
                     new Discord.MessageEmbed()
-                      .setColor('#ff8997')
-                      .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+                      .setColor(Colors.pink_red)
+                      .setThumbnail(Icons.erro)
                       .setDescription(
                         `O usuário ${user} possui a DM fechada, por isso não pude avisá-lo`
                       )

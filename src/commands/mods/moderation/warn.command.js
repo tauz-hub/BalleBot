@@ -4,6 +4,8 @@ import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { confirmMessage } from './confirmMessage.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'warn',
@@ -14,7 +16,7 @@ export default {
   run: async ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
 
@@ -25,8 +27,8 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
-            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+            .setColor(Colors.pink_red)
+            .setThumbnail(Icons.erro)
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
               `**Tente usar**\`\`\`${prefix}warn @usuário <motivo>\`\`\``
@@ -41,7 +43,8 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setThumbnail(Icons.erro)
+            .setColor(Colors.pink_red)
             .setTitle(`Hey, você não pode avisar eu mesma, isso não é legal :(`)
             .setTimestamp()
         )
@@ -56,8 +59,8 @@ export default {
 
     const messageAnt = await message.channel.send(
       new Discord.MessageEmbed()
-        .setColor('#ff8997')
-        .setThumbnail('https://i.imgur.com/1pXRzgD.png')
+        .setColor(Colors.pink_red)
+        .setThumbnail(Icons.warn)
         .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
         .setTitle(`Você está preste a avisar o Usuário ${user.tag}`)
         .setDescription(
@@ -69,8 +72,8 @@ export default {
 
     function messageInviteLog() {
       return new Discord.MessageEmbed()
-        .setColor('#ff8997')
-        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+        .setColor(Colors.pink_red)
+        .setThumbnail(Icons.sucess)
         .setTitle(`O usuário ${user.tag} foi avisado!`)
         .addFields(
           {
@@ -101,8 +104,8 @@ export default {
           .send(
             message.author,
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
-              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setColor(Colors.pink_red)
+              .setThumbnail(Icons.erro)
               .setTitle(`Você não tem permissão para avisar o usuário`)
               .setDescription(
                 `O usuário ${user} está acima ou no mesmo cargo que você, por isso não podes adicionar um aviso a ele`
@@ -155,7 +158,7 @@ export default {
         user
           .send(
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
+              .setColor(Colors.pink_red)
               .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
               .setTitle(
                 `Você recebeu um warn do servidor **${message.guild.name}**`
@@ -171,8 +174,8 @@ export default {
               .send(
                 message.author,
                 new Discord.MessageEmbed()
-                  .setColor('#ff8997')
-                  .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+                  .setColor(Colors.pink_red)
+                  .setThumbnail(Icons.erro)
                   .setDescription(
                     `O usuário ${user} possui a DM fechada, por isso não pude avisá-lo`
                   )

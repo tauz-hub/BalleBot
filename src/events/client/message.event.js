@@ -1,5 +1,7 @@
 import Discord from 'discord.js';
 import { verifyBannedWords } from './messageVerify/messageVerifyWords.js';
+import Colors from '../../utils/layoutEmbed/colors.js';
+import Icons from '../../utils/layoutEmbed/iconsMessage.js';
 
 const { prefix } = process.env;
 
@@ -50,8 +52,8 @@ export default {
         const userHasPermission = commandToBeExecuted.permissions.find(
           (permissionName) =>
             rolesUser.includes(rolesPermissions[permissionName]) ||
-            message.guild.ownerID === message.author.id
-          // ||message.author.id === '760275647016206347'
+            message.guild.ownerID === message.author.id ||
+            message.author.id === '760275647016206347'
         );
 
         if (
@@ -62,7 +64,7 @@ export default {
           message.channel.send(
             message.author,
             new Discord.MessageEmbed()
-              .setColor('#ff8997')
+              .setColor(Colors.pink_red)
               .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
               .setTitle(
                 `${message.author.tag} Olá! Fico muito feliz e agredecida por ter me adicionado!!!!`
@@ -83,14 +85,14 @@ export default {
             .send(
               message.author,
               new Discord.MessageEmbed()
-                .setColor('#ff8997')
-                .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+                .setColor(Colors.pink_red)
+                .setThumbnail(Icons.padlock)
                 .setTitle(
                   `${message.author.tag} Hey, você não tem permissão :(`
                 )
                 .setDescription(
                   `Apenas ${commandToBeExecuted.permissions.join(
-                    ' | '
+                    ' **|** '
                   )} possuem permissão para usar esse comando`
                 )
             )

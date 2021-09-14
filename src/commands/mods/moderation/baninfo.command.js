@@ -2,6 +2,8 @@ import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'baninfo',
@@ -12,7 +14,7 @@ export default {
   run: async ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     const { user } = getUserOfCommand(client, message);
@@ -25,11 +27,15 @@ export default {
       message.channel.send(
         message.author,
         new Discord.MessageEmbed()
-          .setColor('#ff8997')
-          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.erro)
           .setTitle(`Não encontrei o usuário!`)
           .setDescription(
-            `**Tente usar**\`\`\`${prefix}baninfo <idUser> ou ${prefix}baninfo @usuário\`\`\``
+            `**Tente usar**\`\`\`${prefix}baninfo <@usuário/ID>\`\`\``
+          )
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
           )
           .setTimestamp()
       );
@@ -52,19 +58,19 @@ export default {
     const descriptionBan = userBanned.reason
       ? userBanned.reason.replace(' — Data: ', '').replace(dataValidation, '')
       : '<Descrição ou motivo não especificado>';
-
+    console.log(user);
     message.channel.send(
       message.author,
       new Discord.MessageEmbed()
-        .setColor('#ff8997')
-        .setThumbnail(userBanned.user.displayAvatarURL({ dynamic: true }))
+        .setColor(Colors.pink_red)
+        .setThumbnail(Icons.sledgehammer)
         .setTitle(
           `Informações sobre o banimento do usuário: ${`${userBanned.user.username}#${userBanned.user.discriminator}`} `
         )
         .setDescription(
-          `**Data:** ${userDataBanned}\n**Descrição:**\`\`\`${descriptionBan}\`\`\``
+          `**Data: ** ${userDataBanned}\n**Descrição: ** \n\`${descriptionBan}\``
         )
-        .setFooter(`ID do usuário: ${userBanned.user.id}`)
+        .setFooter(`ID do usuário: ${user.id}`)
         .setTimestamp()
     );
   },

@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import { prefix } from '../../assets/prefix.js';
 import { messageErro } from '../../utils/Embeds/error.template.js';
 import { helpWithASpecificCommand } from '../everyone/comandosCommon/help.command.js';
+import Colors from '../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'setAdm',
@@ -15,7 +16,7 @@ export default {
     );
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     if (!args[2]) {
@@ -50,7 +51,7 @@ export default {
     message.channel.send(
       message.author,
       new Discord.MessageEmbed()
-        .setColor('#ff8997')
+        .setColor(Colors.pink_red)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setTitle(`Os Cargos Administrativos foram setados!:`)
         .setDescription(

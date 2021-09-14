@@ -1,5 +1,7 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'ping',
@@ -14,10 +16,9 @@ export default {
       msg.edit(
         '',
         new Discord.MessageEmbed()
-          .setColor('#ff8997')
-          .setTitle('🏓Pong!')
-
-          .setThumbnail('https://i.imgur.com/gfDpssU.png')
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.wifi)
+          .setTitle(`🏓Pong! ${message.author.tag}`)
           .setDescription(
             ` Latency is ${timestampDiff}ms. API latency is ${Math.round(
               client.ws.ping

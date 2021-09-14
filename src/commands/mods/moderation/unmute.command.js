@@ -2,7 +2,8 @@ import Discord from 'discord.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
-import Icons from '../../../utils/icons/iconsMessage.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
+import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'unmute',
@@ -13,7 +14,7 @@ export default {
   run: async ({ message, client, args }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
-      helpWithASpecificCommand(client.Commands.get(command), message, client);
+      helpWithASpecificCommand(client.Commands.get(command), message);
     }
 
     const { user } = getUserOfCommand(client, message);
@@ -23,7 +24,7 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
@@ -39,7 +40,7 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
             .setDescription(`Você não tem permissão para desmutar o usuário`)
             .setTitle(`Peça para um cargo maior desmutar o membro`)
@@ -56,7 +57,7 @@ export default {
         .send(
           message.author,
           new Discord.MessageEmbed()
-            .setColor('#ff8997')
+            .setColor(Colors.pink_red)
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
             .setDescription(
               `O usuário ${user} não está mutado no servidor, para mutar user ${prefix}mute <idUser> <motivo> <tempo>`
@@ -91,7 +92,7 @@ export default {
         .setTitle(`Usuário desmutado com sucesso`)
         .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
         .setThumbnail(Icons.unmute)
-        .setColor('#ff8997');
+        .setColor(Colors.pink_red);
     }
     if (channelLog) {
       channelLog.send(message.author, messageInviteLog());
