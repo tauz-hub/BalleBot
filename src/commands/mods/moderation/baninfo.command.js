@@ -58,7 +58,7 @@ export default {
     const descriptionBan = userBanned.reason
       ? userBanned.reason.replace(' — Data: ', '').replace(dataValidation, '')
       : '<Descrição ou motivo não especificado>';
-    console.log(user);
+
     message.channel.send(
       message.author,
       new Discord.MessageEmbed()
