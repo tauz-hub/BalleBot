@@ -3,7 +3,7 @@ import { prefix } from '../../../assets/prefix.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
-function bouncer(array) {
+function removeWordsNull(array) {
   const filterArray = array.filter((item) => {
     return Boolean(item);
   });
@@ -23,8 +23,10 @@ export default {
       `guild_id_${message.guild.id}`
     );
 
-    if (guildIdDatabase.has('wordsBanned')) {
-      const listOfWords = bouncer(guildIdDatabase.get('wordsBanned')).sort();
+    if (guildIdDatabase.has('listOfWordsBanned')) {
+      const listOfWords = removeWordsNull(
+        guildIdDatabase.get('listOfWordsBanned')
+      ).sort();
       if (listOfWords.lenght > 0) {
         message.channel.send(
           message.author,

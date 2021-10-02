@@ -1,28 +1,68 @@
+import { prefix } from '../../assets/prefix.js';
+
 export function getUserOfCommand(client, message) {
-  const [command, ...rest] = message.content.split(' ');
-  let [userTag, ...msg] = rest;
-  msg = msg.join(' ');
-  if (userTag) userTag.replace(/(<)(@)(>)/g, '');
+  const usersInMessage = [];
+  const usersRegexRemoveMessage = [];
+  const regexForRemoveMention = /(<)|(@!)|(>)/g;
 
-  if (isNaN(userTag)) {
-    const index = message.content.indexOf('#');
+  const [, ...args] = message.content.split(/ +/);
 
-    if (index >= 0) {
-      userTag = message.content.slice(command.length + 1, index + 5);
+  args.forEach((text) => {
+    const itemArgs = text.replace(regexForRemoveMention, '');
+    const regexId = /(.*#\d{4})|([0-9]{18})/g;
 
-      msg = message.content.slice(index + 5, message.content.length);
+    if (regexId.test(itemArgs)) {
+      const messageContent = message.content.replace(regexForRemoveMention, '');
+
+      const pieceOfMessage = messageContent.match(itemArgs);
+
+      const stringSplititemArgs = messageContent.split(pieceOfMessage[0]);
+
+      if (stringSplititemArgs[0].startsWith(prefix)) {
+        const index = stringSplititemArgs[0].indexOf(' ');
+        stringSplititemArgs[0].slice(0, index + 1);
+      }
+
+      stringSplititemArgs[0] += itemArgs;
+
+      const stringSearchUser = stringSplititemArgs[0].split(' ').reverse();
+      for (let i = 0; i < stringSearchUser.length; i++) {
+        if (
+          client.users.cache.some(
+            (u) => u.tag === stringSearchUser[0] || u.id === stringSearchUser[0]
+          )
+        ) {
+          usersInMessage.push(
+            client.users.cache.find(
+              (u) =>
+                u.tag === stringSearchUser[0] || u.id === stringSearchUser[0]
+            )
+          );
+          usersRegexRemoveMessage.push(stringSearchUser[0]);
+          stringSearchUser.length = 0;
+        }
+
+        stringSearchUser[0] = `${stringSearchUser[i + 1]} ${
+          stringSearchUser[0]
+        }`;
+      }
     }
-  }
+  });
 
-  let user;
+  const regexUsers = new RegExp(
+    usersRegexRemoveMessage.filter((text) => text).join('|'),
+    'g'
+  );
+  let messageInvite = message.content
+    .replace(regexUsers, '')
+    .replace(regexForRemoveMention, '');
 
-  user = client.users.cache.find((u) => u.tag === userTag || u.id === userTag);
-
-  if (message.mentions.users.size > 0 && !user) {
-    user = message.mentions.users.first();
+  if (regexUsers.test(message.content)) {
+    const index = messageInvite.indexOf(' ');
+    messageInvite = messageInvite.slice(index + 1, messageInvite.length).trim();
   }
-  if (user) {
-    return { user, index: message.content.indexOf(msg) };
+  if (usersInMessage) {
+    return { users: usersInMessage, restOfMessage: messageInvite };
   }
-  return { undefined, index: undefined };
+  return undefined;
 }

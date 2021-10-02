@@ -14,16 +14,16 @@ function getMessageCommands(listTempleteCategories, namesCategories) {
 }
 
 export function helpWithASpecificCommand(fullCommand, message) {
-  const markedAliases = [];
-  const markedPermissions = [];
+  const stringMarkedAliases = [];
+  const stringMarkedPermissions = [];
 
   if (fullCommand.aliases) {
     for (let i = 0; i < fullCommand.aliases.length; i++) {
-      markedAliases[i] = `\`${prefix + fullCommand.aliases[i]}\``;
+      stringMarkedAliases[i] = `\`${prefix + fullCommand.aliases[i]}\``;
     }
   }
   for (let i = 0; i < fullCommand.permissions.length; i++) {
-    markedPermissions[i] = `\`${fullCommand.permissions[i]}\``;
+    stringMarkedPermissions[i] = `\`${fullCommand.permissions[i]}\``;
   }
 
   const { category, description } = fullCommand;
@@ -39,9 +39,9 @@ export function helpWithASpecificCommand(fullCommand, message) {
         }**\n\n**Sobre o Comando:**\n> \`\`${
           description || `Não especificado`
         }\`\`\n**Cargos necessários para utilizar o comando: **\n> ${
-          markedPermissions.join(' | ') || '`Não especificado`'
+          stringMarkedPermissions.join(' | ') || '`Não especificado`'
         }\n**Sinônimos: **\n> ${
-          markedAliases.join(' **|** ') ||
+          stringMarkedAliases.join(' **|** ') ||
           '`<Este comando não possui sinônimos>`'
         }`
       )
@@ -118,10 +118,8 @@ export default {
             Caso queira suporte com nossos desenvolvedores entre em contato com a equipe responsável no servidor Ballerini:\n
             > **Ballerini:** https://discord.gg/ballerini \n
 
-            **Essas são as categorias e comandos que podem ser usados: **\n\n${getMessageCommands(
-              listTempleteCategories,
-              namesCategories
-            )}`
+            **Essas são as categorias e comandos que podem ser usados: **\n\n
+            ${getMessageCommands(listTempleteCategories, namesCategories)}`
           )
           .setFooter(
             `• Para saber as informações de um comando específico, use ${prefix}help <comando>`

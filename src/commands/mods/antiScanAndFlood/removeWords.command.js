@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
+import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
@@ -14,6 +15,12 @@ export default {
   aliases: ['rmvwords', 'wordsremove', 'removerPalavras'],
   category: 'AntiSpam ⚠️',
   run: ({ message, client, args }) => {
+    if (!args[0]) {
+      const [command] = message.content.slice(prefix.length).split(/ +/);
+      helpWithASpecificCommand(client.Commands.get(command), message);
+      return;
+    }
+
     const deleteRegexList = [];
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`
@@ -23,13 +30,13 @@ export default {
       deleteRegexList.push(args[i].toLowerCase());
     }
 
-    if (guildIdDatabase.has('wordsBanned')) {
-      const listRegexInDatabase = guildIdDatabase.get('wordsBanned');
+    if (guildIdDatabase.has('listOfWordsBanned')) {
+      const listRegexInDatabase = guildIdDatabase.get('listOfWordsBanned');
       if (!allNull(listRegexInDatabase)) {
         for (let i = 0; i < deleteRegexList.length; i++) {
           for (let j = 0; j < listRegexInDatabase.length; j++) {
             if (deleteRegexList[i] === listRegexInDatabase[j]) {
-              guildIdDatabase.delete(`wordsBanned.${j}`);
+              guildIdDatabase.delete(`listOfWordsBanned.${j}`);
             }
           }
         }

@@ -23,14 +23,14 @@ export function verifyBannedWords(client, message) {
       rolesUser.includes(rolesPermissions.padawan) ||
       message.guild.ownerID === message.author.id;
 
-    if (!userHasPermission && guildIdDatabase.has('wordsBanned')) {
-      const wordsBannedGuild = guildIdDatabase.get('wordsBanned');
+    if (!userHasPermission && guildIdDatabase.has('listOfWordsBanned')) {
+      const listOfWordsBannedGuild = guildIdDatabase.get('listOfWordsBanned');
 
       const messageLowerCase = message.content.toLowerCase();
 
-      if (wordsBannedGuild.length !== 0) {
+      if (listOfWordsBannedGuild.length !== 0) {
         const wordsRegex = new RegExp(
-          wordsBannedGuild.filter((word) => word).join('|'),
+          listOfWordsBannedGuild.filter((word) => word).join('|'),
           'g'
         );
 

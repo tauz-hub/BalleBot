@@ -21,16 +21,16 @@ export default {
       `guild_id_${message.guild.id}`
     );
 
-    const { user } = getUserOfCommand(client, message);
+    const { users } = getUserOfCommand(client, message);
 
-    if (!user) {
+    if (!users) {
       message.channel
         .send(
           message.author,
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-            .setTitle(`Não encontrei o usuário!`)
+            .setTitle(`Não encontrei os usuários!`)
             .setDescription(
               `**Tente usar**\`\`\`${prefix}warnlist @usuário\`\`\``
             )
@@ -39,37 +39,41 @@ export default {
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
+    users.forEach(async (user) => {
+      if (guildIdDatabase.has(`user_id_${user.id}`)) {
+        const myUser = guildIdDatabase.get(`user_id_${user.id}`);
+        const warnsUser = myUser.reasons;
 
-    if (guildIdDatabase.has(`user_id_${user.id}`)) {
-      const myUser = guildIdDatabase.get(`user_id_${user.id}`);
-      const warnsUser = myUser.reasons;
+        if (warnsUser) {
+          const messageCommands = warnsUser.reduce(
+            (previous, current, index) =>
+              `${previous}**Aviso ${
+                index + 1
+              }:** \n **Data: ${parseDateForDiscord(
+                myUser.dataReasonsWarns[index]
+              )}** \n **Motivo:** \n \`\`\`${current}\`\`\`\n\n`,
+            ''
+          );
 
-      if (warnsUser) {
-        const messageCommands = warnsUser.reduce(
-          (previous, current, index) =>
-            `${previous}**Aviso ${
-              index + 1
-            }:** \n **Data: ${parseDateForDiscord(
-              myUser.dataReasonsWarns[index]
-            )}** \n **Motivo:** \n \`\`\`${current}\`\`\`\n\n`,
-          ''
-        );
-
-        message.channel.send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-            .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
-            .setTitle(`Lista de warns do usuário: `)
-            .setDescription(messageCommands)
-            .setFooter(`ID do usuário: ${user.id}`)
-        );
-        return;
+          message.channel.send(
+            message.author,
+            new Discord.MessageEmbed()
+              .setColor(Colors.pink_red)
+              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setAuthor(
+                `${user.tag}`,
+                user.displayAvatarURL({ dynamic: true })
+              )
+              .setTitle(`Lista de warns do usuário: `)
+              .setDescription(messageCommands)
+              .setFooter(`ID do usuário: ${user.id}`)
+          );
+          return;
+        }
       }
-    }
-    message.channel
-      .send('usuário não encontrado no banco')
-      .then((msg) => msg.delete({ timeout: 15000 }));
+      message.channel
+        .send('usuário não encontrado no banco')
+        .then((msg) => msg.delete({ timeout: 15000 }));
+    });
   },
 };

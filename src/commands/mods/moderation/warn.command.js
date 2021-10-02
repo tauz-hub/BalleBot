@@ -20,9 +20,9 @@ export default {
       return;
     }
 
-    const { user, index } = getUserOfCommand(client, message);
+    const { users, restOfMessage } = getUserOfCommand(client, message);
 
-    if (!user) {
+    if (!users) {
       message.channel
         .send(
           message.author,
@@ -38,99 +38,115 @@ export default {
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
-    if (user.id === message.guild.me.id) {
-      message.channel
-        .send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setThumbnail(Icons.erro)
-            .setColor(Colors.pink_red)
-            .setTitle(`Hey, você não pode avisar eu mesma, isso não é legal :(`)
-            .setTimestamp()
-        )
-        .then((msg) => msg.delete({ timeout: 15000 }));
-      return;
-    }
 
-    const reason =
-      args[0] && index !== 0
-        ? message.content.slice(index, message.content.length).trim()
-        : '<Motivo não especificado>';
+    const reason = restOfMessage || '<Motivo não especificado>';
 
     const messageAnt = await message.channel.send(
       new Discord.MessageEmbed()
         .setColor(Colors.pink_red)
         .setThumbnail(Icons.warn)
-        .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
-        .setTitle(`Você está preste a avisar o Usuário ${user.tag}`)
+
+        .setTitle(`Você está preste a avisar os Usuários ${users}`)
         .setDescription(
           `**Pelo Motivo de : **\n\n\`\`\`${reason}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
         )
-        .setFooter(`ID do usuário: ${user.id}`)
+
         .setTimestamp()
     );
-
-    function messageInviteLog() {
-      return new Discord.MessageEmbed()
-        .setColor(Colors.pink_red)
-        .setThumbnail(Icons.sucess)
-        .setTitle(`O usuário ${user.tag} foi avisado!`)
-        .addFields(
-          {
-            name: '**Motivo: **',
-            value: `\n\n\`\`\`${reason}\`\`\``,
-          },
-          {
-            name: '**Aplicadado por:**',
-            value: `${message.author} - ${message.author.id}`,
-          }
-        )
-        .setFooter(`ID do usuário avisado: ${user.id}`)
-        .setTimestamp();
-    }
 
     if (await confirmMessage(message, messageAnt)) {
       messageAnt.delete();
 
-      const memberUser = client.guilds.cache
-        .get(message.guild.id)
-        .members.cache.get(user.id);
+      const guildIdDatabase = new client.Database.table(
+        `guild_id_${message.guild.id}`
+      );
 
-      if (
-        memberUser.roles.highest.position >=
-        message.member.roles.highest.position
-      ) {
-        message.channel
-          .send(
+      const channelLog = client.channels.cache.get(
+        guildIdDatabase.get('channel_log')
+      );
+
+      users.forEach(async (user) => {
+        const memberUser = client.guilds.cache
+          .get(message.guild.id)
+          .members.cache.get(user.id);
+        if (user.id === message.guild.me.id) {
+          message.channel
+            .send(
+              message.author,
+              new Discord.MessageEmbed()
+                .setThumbnail(Icons.erro)
+                .setColor(Colors.pink_red)
+                .setTitle(
+                  `Hey, você não pode avisar eu mesma, isso não é legal :(`
+                )
+                .setTimestamp()
+            )
+            .then((msg) => msg.delete({ timeout: 15000 }));
+          return;
+        }
+        if (
+          memberUser.roles.highest.position >=
+          message.member.roles.highest.position
+        ) {
+          message.channel
+            .send(
+              message.author,
+              new Discord.MessageEmbed()
+                .setColor(Colors.pink_red)
+                .setThumbnail(Icons.erro)
+                .setTitle(`Você não tem permissão para avisar o usuário`)
+                .setDescription(
+                  `O usuário ${user} está acima ou no mesmo cargo que você, por isso não podes adicionar um aviso a ele`
+                )
+                .setTimestamp()
+            )
+            .then((msg) => msg.delete({ timeout: 15000 }));
+          return;
+        }
+
+        if (channelLog) {
+          channelLog.send(
             message.author,
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
-              .setThumbnail(Icons.erro)
-              .setTitle(`Você não tem permissão para avisar o usuário`)
-              .setDescription(
-                `O usuário ${user} está acima ou no mesmo cargo que você, por isso não podes adicionar um aviso a ele`
+              .setThumbnail(Icons.sucess)
+              .setTitle(`O usuário ${user.tag} foi avisado!`)
+              .addFields(
+                {
+                  name: '**Motivo: **',
+                  value: `\n\n\`\`\`${reason}\`\`\``,
+                },
+                {
+                  name: '**Aplicadado por:**',
+                  value: `${message.author} - ${message.author.id}`,
+                }
               )
+              .setFooter(`ID do usuário avisado: ${user.id}`)
               .setTimestamp()
-          )
-          .then((msg) => msg.delete({ timeout: 15000 }));
-      } else {
-        const guildIdDatabase = new client.Database.table(
-          `guild_id_${message.guild.id}`
-        );
-
-        const channelLog = client.channels.cache.get(
-          guildIdDatabase.get('channel_log')
-        );
-
-        if (channelLog) {
-          channelLog.send(message.author, messageInviteLog());
-        } else {
-          message.channel.send(
-            message.author,
-            messageInviteLog().then((msg) => msg.delete({ timeout: 15000 }))
           );
+        } else {
+          message.channel
+            .send(
+              message.author,
+              new Discord.MessageEmbed()
+                .setColor(Colors.pink_red)
+                .setThumbnail(Icons.sucess)
+                .setTitle(`O usuário ${user.tag} foi avisado!`)
+                .addFields(
+                  {
+                    name: '**Motivo: **',
+                    value: `\n\n\`\`\`${reason}\`\`\``,
+                  },
+                  {
+                    name: '**Aplicadado por:**',
+                    value: `${message.author} - ${message.author.id}`,
+                  }
+                )
+                .setFooter(`ID do usuário avisado: ${user.id}`)
+                .setTimestamp()
+            )
+            .then((msg) => msg.delete({ timeout: 15000 }));
         }
-
         if (guildIdDatabase.has(`user_id_${user.id}`)) {
           guildIdDatabase.set(`user_id_${user.id}.name`, user.username);
           guildIdDatabase.set(
@@ -184,7 +200,7 @@ export default {
               )
               .then((msg) => msg.delete({ timeout: 15000 }))
           );
-      }
+      });
     } else {
       await messageAnt.delete();
     }

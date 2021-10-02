@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import { prefix } from '../../../assets/prefix.js';
+import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
@@ -10,16 +11,15 @@ export default {
   aliases: ['setwords'],
   category: 'AntiSpam ⚠️',
   run: ({ message, client, args }) => {
+    if (!args[0]) {
+      const [command] = message.content.slice(prefix.length).split(/ +/);
+      helpWithASpecificCommand(client.Commands.get(command), message);
+      return;
+    }
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`
     );
 
-    const setRegexList = [];
-    let position = 0;
-
-    for (let i = 0; i < args.length; i++) {
-      setRegexList.push(args[i].toLowerCase());
-    }
     if (!guildIdDatabase.has('channel_log')) {
       message.channel.send(
         message.author,
@@ -39,6 +39,13 @@ export default {
           .setTimestamp()
       );
       return;
+    }
+
+    const setRegexList = [];
+    let position = 0;
+
+    for (let i = 0; i < args.length; i++) {
+      setRegexList.push(args[i].toLowerCase());
     }
 
     function messageSucess() {
@@ -62,8 +69,8 @@ export default {
           .setTimestamp()
       );
     }
-    if (guildIdDatabase.has('wordsBanned')) {
-      const listRegexInDatabase = guildIdDatabase.get('wordsBanned');
+    if (guildIdDatabase.has('listOfWordsBanned')) {
+      const listRegexInDatabase = guildIdDatabase.get('listOfWordsBanned');
 
       for (let i = 0; i < setRegexList.length; i++) {
         for (let j = 0; j < listRegexInDatabase.length; j++) {
@@ -76,18 +83,21 @@ export default {
       for (let j = 0; j < listRegexInDatabase.length; j++) {
         if (listRegexInDatabase[j] === null) {
           if (setRegexList[position]) {
-            guildIdDatabase.set(`wordsBanned.${j}`, setRegexList[position]);
+            guildIdDatabase.set(
+              `listOfWordsBanned.${j}`,
+              setRegexList[position]
+            );
             position++;
           }
         }
       }
 
       for (let i = position; i < setRegexList.length - position; i++) {
-        guildIdDatabase.push('wordsBanned', setRegexList[i]);
+        guildIdDatabase.push('listOfWordsBanned', setRegexList[i]);
       }
       messageSucess();
     } else {
-      guildIdDatabase.set('wordsBanned', setRegexList);
+      guildIdDatabase.set('listOfWordsBanned', setRegexList);
       messageSucess();
     }
   },

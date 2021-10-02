@@ -16,10 +16,24 @@ export default {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
     }
+    if (!message.member.hasPermission('MANAGE_ROLES')) {
+      message.channel
+        .send(
+          message.author,
+          new Discord.MessageEmbed()
+            .setColor(Colors.pink_red)
+            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+            .setDescription(`Você não tem permissão para desmutar usuários`)
+            .setTitle(`Peça para um cargo maior desmutar o membro`)
 
-    const { user } = getUserOfCommand(client, message);
+            .setTimestamp()
+        )
+        .then((msg) => msg.delete({ timeout: 15000 }));
+      return;
+    }
+    const { users } = getUserOfCommand(client, message);
 
-    if (!user) {
+    if (!users) {
       message.channel
         .send(
           message.author,
@@ -35,71 +49,73 @@ export default {
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
-    if (!message.member.hasPermission('MANAGE_ROLES')) {
-      message.channel
-        .send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-            .setDescription(`Você não tem permissão para desmutar o usuário`)
-            .setTitle(`Peça para um cargo maior desmutar o membro`)
-            .setFooter(`ID do usuário : ${user.id}`)
-            .setTimestamp()
+    const tableTemporarilyMutated = new client.Database.table(
+      `tableTemporarilyMutated`
+    );
+    const guildUndefinedMutated = new client.Database.table(
+      `guild_users_mutated_${message.guild.id}`
+    );
+    users.forEach(async (user) => {
+      const userMuted =
+        tableTemporarilyMutated.get(
+          `guild_id_${message.guild.id}_user_id_${user.id}`
+        ) || guildUndefinedMutated.get(`user_id_${user.id}`);
+
+      if (!userMuted) {
+        message.channel
+          .send(
+            message.author,
+            new Discord.MessageEmbed()
+              .setColor(Colors.pink_red)
+              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setDescription(
+                `O usuário ${user} não está mutado no servidor, para mutar user ${prefix}mute <idUser> <motivo> <tempo>`
+              )
+              .setTitle(`Usuário não está mutado`)
+              .setFooter(`ID do usuário : ${user.id}`)
+              .setTimestamp()
+          )
+          .then((msg) => msg.delete({ timeout: 15000 }));
+        return;
+      }
+
+      if (guildUndefinedMutated.has(`user_id_${user.id}`)) {
+        guildUndefinedMutated.delete(`user_id_${user.id}`);
+      } else if (
+        tableTemporarilyMutated.has(
+          `guild_id_${message.guild.id}_user_id_${user.id}`
         )
-        .then((msg) => msg.delete({ timeout: 15000 }));
-      return;
-    }
-    const tableMuted = new client.Database.table(`tableMuted`);
+      ) {
+        tableTemporarilyMutated.delete(
+          `guild_id_${message.guild.id}_user_id_${user.id}`
+        );
+      }
+      const userMember = client.guilds.cache
+        .get(userMuted.guildId)
+        .members.cache.get(userMuted.id);
 
-    if (!tableMuted.has(`guild_id_${message.guild.id}_user_id_${user.id}`)) {
-      message.channel
-        .send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-            .setDescription(
-              `O usuário ${user} não está mutado no servidor, para mutar user ${prefix}mute <idUser> <motivo> <tempo>`
-            )
-            .setTitle(`Usuário não está mutado`)
-            .setFooter(`ID do usuário : ${user.id}`)
-            .setTimestamp()
-        )
-        .then((msg) => msg.delete({ timeout: 15000 }));
-      return;
-    }
-    const userMuted = tableMuted.get(
-      `guild_id_${message.guild.id}_user_id_${user.id}`
-    );
+      userMember.roles.remove(userMuted.roleId);
+      const guildIdDatabase = new client.Database.table(
+        `guild_id_${message.guild.id}`
+      );
+      const channelLog = client.channels.cache.get(
+        guildIdDatabase.get('channel_log')
+      );
 
-    const userMember = client.guilds.cache
-      .get(userMuted.guildId)
-      .members.cache.get(userMuted.id);
-
-    userMember.roles.remove(userMuted.roleId);
-    tableMuted.delete(`guild_id_${userMuted.guildId}_user_id_${userMuted.id}`);
-
-    const guildIdDatabase = new client.Database.table(
-      `guild_id_${message.guild.id}`
-    );
-    const channelLog = client.channels.cache.get(
-      guildIdDatabase.get('channel_log')
-    );
-
-    function messageInviteLog() {
-      return new Discord.MessageEmbed()
-        .setTitle(`Usuário desmutado com sucesso`)
-        .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
-        .setThumbnail(Icons.unmute)
-        .setColor(Colors.pink_red);
-    }
-    if (channelLog) {
-      channelLog.send(message.author, messageInviteLog());
-    } else {
-      message.channel
-        .send(message.author, messageInviteLog())
-        .then((msg) => msg.delete({ timeout: 15000 }));
-    }
+      function messageInviteLog() {
+        return new Discord.MessageEmbed()
+          .setTitle(`Usuário desmutado com sucesso`)
+          .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
+          .setThumbnail(Icons.unmute)
+          .setColor(Colors.pink_red);
+      }
+      if (channelLog) {
+        channelLog.send(message.author, messageInviteLog());
+      } else {
+        message.channel
+          .send(message.author, messageInviteLog())
+          .then((msg) => msg.delete({ timeout: 15000 }));
+      }
+    });
   },
 };

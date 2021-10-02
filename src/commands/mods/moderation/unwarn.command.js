@@ -21,15 +21,15 @@ export default {
       `guild_id_${message.guild.id}`
     );
 
-    const { user } = getUserOfCommand(client, message);
+    const { users } = getUserOfCommand(client, message);
 
-    if (!user) {
+    if (!users) {
       message.channel.send(
         message.author,
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
           .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-          .setTitle(`Não encontrei o usuário!`)
+          .setTitle(`Não encontrei os usuários!`)
           .setDescription(
             `**Tente usar**\`\`\`${prefix}unwarn @usuário <aviso 1 >\`\`\``
           )
@@ -37,113 +37,100 @@ export default {
       );
       return;
     }
-
-    const memberUser = client.guilds.cache
-      .get(message.guild.id)
-      .members.cache.get(user.id);
-    if (
-      memberUser.roles.highest.position >= message.member.roles.highest.position
-    ) {
-      message.channel
-        .send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-            .setTitle(`Você não tem permissão para remover o aviso do usuário`)
-            .setDescription(
-              `Você não possui um cargo maior que o usuário ${user.tag} para remover os avisos dele`
-            )
-            .setTimestamp()
-        )
-        .then((msg) => msg.delete({ timeout: 15000 }));
-    } else {
-      const warnRemove = isNaN(args[args.length - 1])
-        ? args[args.length - 1]
-        : Number(args[args.length - 1]) - 1;
-
-      if (guildIdDatabase.has(`user_id_${user.id}`)) {
-        if (!args[1]) {
-          return message.channel.send(
-            'selecione um aviso que existe: ex. aviso1 returnnn'
-          );
-        }
-
-        if (isNaN(warnRemove)) {
-          if (warnRemove.toLowerCase() === 'all') {
-            guildIdDatabase.delete(`user_id_${user.id}.reasons`);
-            guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
-            guildIdDatabase.set(`user_id_${user.id}.warnsCount`, 0);
-            guildIdDatabase.set(`user_id_${user.id}.reasons`, []);
-
-            message.channel
-              .send(
-                message.author,
-                new Discord.MessageEmbed()
-                  .setColor(Colors.pink_red)
-                  .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                  .setTitle(
-                    `Todos os avisos foram removidos do usuário ${user.tag}`
-                  )
-                  .setDescription(`**O usuário não possui avisos**`)
-                  .setFooter(`ID do usuário: ${user.id}`)
-                  .setTimestamp()
+    users.forEach(async (user) => {
+      const memberUser = client.guilds.cache
+        .get(message.guild.id)
+        .members.cache.get(user.id);
+      if (
+        memberUser.roles.highest.position >=
+        message.member.roles.highest.position
+      ) {
+        message.channel
+          .send(
+            message.author,
+            new Discord.MessageEmbed()
+              .setColor(Colors.pink_red)
+              .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+              .setTitle(
+                `Você não tem permissão para remover o aviso do usuário ${user.tag}`
               )
-              .then((msg) => msg.delete({ timeout: 15000 }));
-            return;
-          }
+              .setDescription(
+                `Você não possui um cargo maior que o usuário ${user.tag} para remover os avisos dele`
+              )
+              .setTimestamp()
+          )
+          .then((msg) => msg.delete({ timeout: 15000 }));
+      } else {
+        const warnRemove = isNaN(args[args.length - 1])
+          ? args[args.length - 1]
+          : Number(args[args.length - 1]) - 1;
 
-          return message.channel.send(
-            'selecione um aviso que existe: ex. aviso1'
-          );
-        }
-
-        const reasons = guildIdDatabase.get(`user_id_${user.id}.reasons`);
-        const dates = guildIdDatabase.get(
-          `user_id_${user.id}.dataReasonsWarns`
-        );
-
-        if (reasons.length !== 0) {
-          if (warnRemove > reasons.length) {
+        if (guildIdDatabase.has(`user_id_${user.id}`)) {
+          if (!args[1]) {
             return message.channel.send(
-              `este usuário não possui o aviso ${warnRemove + 1}`
+              'selecione um aviso que existe: ex. aviso1 / aviso 1 / 1'
             );
           }
 
-          const avisoDeleted = reasons[warnRemove];
-          const dataDeleted = dates[warnRemove];
-          reasons.splice(warnRemove, 1);
-          dates.splice(warnRemove, 1);
+          if (isNaN(warnRemove)) {
+            if (warnRemove.toLowerCase() === 'all') {
+              guildIdDatabase.delete(`user_id_${user.id}.reasons`);
+              guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
+              guildIdDatabase.set(`user_id_${user.id}.warnsCount`, 0);
+              guildIdDatabase.set(`user_id_${user.id}.reasons`, []);
 
-          guildIdDatabase.delete(`user_id_${user.id}.reasons`);
-          guildIdDatabase.set(`user_id_${user.id}.reasons`, reasons);
-          guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
-          guildIdDatabase.set(`user_id_${user.id}.dataReasonsWarns`, dates);
-          guildIdDatabase.subtract(`user_id_${user.id}.warnsCount`, 1);
+              message.channel
+                .send(
+                  message.author,
+                  new Discord.MessageEmbed()
+                    .setColor(Colors.pink_red)
+                    .setThumbnail(
+                      client.user.displayAvatarURL({ dynamic: true })
+                    )
+                    .setTitle(
+                      `Todos os avisos foram removidos do usuário ${user.tag}`
+                    )
+                    .setDescription(`**O usuário não possui avisos**`)
+                    .setFooter(`ID do usuário: ${user.id}`)
+                    .setTimestamp()
+                )
+                .then((msg) => msg.delete({ timeout: 15000 }));
+              return;
+            }
 
-          const channelLog = client.channels.cache.get(
-            guildIdDatabase.get('channel_log')
-          );
-          if (channelLog) {
-            channelLog.send(
-              message.author,
-              new Discord.MessageEmbed()
-                .setColor(Colors.pink_red)
-                .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                .setDescription(
-                  `O usuário ${user.tag} teve um aviso removido! \n
-                    **Data:** ${parseDateForDiscord(dataDeleted)}
-                    **Motivo** ${avisoDeleted}
-                    `
-                )
-                .setTitle(
-                  `Aviso ${warnRemove + 1} foi removido do usuário ${user.tag}`
-                )
-                .setTimestamp()
+            return message.channel.send(
+              'selecione um aviso que existe: ex. aviso1'
             );
-          } else {
-            message.channel
-              .send(
+          }
+
+          const reasons = guildIdDatabase.get(`user_id_${user.id}.reasons`);
+          const dates = guildIdDatabase.get(
+            `user_id_${user.id}.dataReasonsWarns`
+          );
+
+          if (reasons.length !== 0) {
+            if (warnRemove > reasons.length) {
+              return message.channel.send(
+                `este usuário não possui o aviso ${warnRemove + 1}`
+              );
+            }
+
+            const avisoDeleted = reasons[warnRemove];
+            const dataDeleted = dates[warnRemove];
+            reasons.splice(warnRemove, 1);
+            dates.splice(warnRemove, 1);
+
+            guildIdDatabase.delete(`user_id_${user.id}.reasons`);
+            guildIdDatabase.set(`user_id_${user.id}.reasons`, reasons);
+            guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
+            guildIdDatabase.set(`user_id_${user.id}.dataReasonsWarns`, dates);
+            guildIdDatabase.subtract(`user_id_${user.id}.warnsCount`, 1);
+
+            const channelLog = client.channels.cache.get(
+              guildIdDatabase.get('channel_log')
+            );
+            if (channelLog) {
+              channelLog.send(
                 message.author,
                 new Discord.MessageEmbed()
                   .setColor(Colors.pink_red)
@@ -160,16 +147,39 @@ export default {
                     }`
                   )
                   .setTimestamp()
-              )
-              .then((msg) => msg.delete({ timeout: 15000 }));
+              );
+            } else {
+              message.channel
+                .send(
+                  message.author,
+                  new Discord.MessageEmbed()
+                    .setColor(Colors.pink_red)
+                    .setThumbnail(
+                      client.user.displayAvatarURL({ dynamic: true })
+                    )
+                    .setDescription(
+                      `O usuário ${user.tag} teve um aviso removido! \n
+                    **Data:** ${parseDateForDiscord(dataDeleted)}
+                    **Motivo** ${avisoDeleted}
+                    `
+                    )
+                    .setTitle(
+                      `Aviso ${warnRemove + 1} foi removido do usuário ${
+                        user.tag
+                      }`
+                    )
+                    .setTimestamp()
+                )
+                .then((msg) => msg.delete({ timeout: 15000 }));
+            }
+            return;
           }
+
+          message.channel.send(`o usuário ${user.tag} não possui avisos`);
           return;
         }
-
-        message.channel.send('este usuário não possui avisos');
-        return;
+        message.channel.send(`usuário ${user.tag} não encontrado no banco`);
       }
-      message.channel.send('usuário não encontrado no banco');
-    }
+    });
   },
 };
