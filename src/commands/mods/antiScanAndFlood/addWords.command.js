@@ -1,16 +1,15 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'addwords',
-  description: `${prefix}words para ver mensagens proibidas no servidor`,
+  description: `<prefix>words para ver mensagens proibidas no servidor`,
   permissions: ['mods'],
   aliases: ['setwords'],
   category: 'AntiSpam ⚠️',
-  run: ({ message, client, args }) => {
+  run: ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
@@ -53,10 +52,8 @@ export default {
         message.author,
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
-          .setThumbnail(Icons.addwords)
-          .setTitle(
-            `As Palavras ou Links foram **adicionados** ao banco com sucesso!`
-          )
+          .setThumbnail(Icons.sucess)
+          .setTitle(`As Palavras ou Links foram **adicionados** ao banco!`)
           .setDescription(
             `**Essas foram as palavras ou links adicionados:** \n> ${args.join(
               ' **|** '

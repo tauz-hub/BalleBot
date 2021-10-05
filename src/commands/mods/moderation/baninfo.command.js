@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { parseDateForDiscord } from '../../../utils/TimeMessageConversor/parseDateForDiscord.js';
@@ -8,17 +7,18 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'baninfo',
-  description: `${prefix}baninfo <userId> ${prefix}baninfo @usuário para saber o motivo de um membro ter sido banido`,
+  description: `<prefix>baninfo @usuário/TAG/ID para saber o motivo de membros terem sidos banidos`,
   permissions: ['mods'],
   aliases: ['verban', 'viewban', 'banuser', 'infoban'],
   category: 'Moderação ⚔️',
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
-    const { users } = getUserOfCommand(client, message);
+
+    const { users } = getUserOfCommand(client, message, prefix);
 
     users.forEach(async (user) => {
       let userBanned;
@@ -36,7 +36,7 @@ export default {
             .setThumbnail(Icons.erro)
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}baninfo <@usuário/ID>\`\`\``
+              `**Tente usar**\`\`\`${prefix}baninfo <@usuário/TAG/ID>\`\`\``
             )
             .setFooter(
               `${message.author.tag}`,

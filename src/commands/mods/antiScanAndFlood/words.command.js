@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
@@ -13,12 +12,12 @@ function removeWordsNull(array) {
 
 export default {
   name: 'words',
-  description: `${prefix}words para ver mensagens proibidas no servidor`,
+  description: `<prefix>words para ver mensagens proibidas no servidor`,
   permissions: ['mods'],
   aliases: ['viewwords', 'words?'],
   dm: true,
   category: 'AntiSpam ⚠️',
-  run: ({ message, client }) => {
+  run: ({ message, client, prefix }) => {
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`
     );
@@ -27,17 +26,18 @@ export default {
       const listOfWords = removeWordsNull(
         guildIdDatabase.get('listOfWordsBanned')
       ).sort();
-      if (listOfWords.lenght > 0) {
+
+      if (listOfWords.length > 0) {
         message.channel.send(
           message.author,
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
-            .setThumbnail(Icons.words)
-            .setTitle('Banco encontrado')
+            .setThumbnail(Icons.sucess)
+            .setTitle('Banco encontrado!')
             .setDescription(
-              `**Aqui está todas as palavras do banco de dados:**\n> ${listOfWords.join(
-                ' **|** '
-              )}\nCaso queira adicionar ou remover alguma palavra use os comando de addWords e removeWords`
+              `**Aqui está todas as palavras do banco de dados:**\n> \`\`${listOfWords.join(
+                '|'
+              )}\`\`\n**Caso queira adicionar ou remover alguma palavra use os comandos de addWords e removeWords**`
             )
             .setFooter(
               `${message.author.tag}`,

@@ -1,17 +1,15 @@
 import Discord from 'discord.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
-import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
-import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'unmute',
-  description: `${prefix}unmute <userId> ou ${prefix}unmute @usuário ou ${prefix}unmute <userTag>`,
+  description: `<prefix>unmute @usuário/TAG/ID para desmutar usuários`,
   permissions: ['mods'],
   aliases: ['tirarmute', 'desmutar', 'desmute'],
   category: 'Moderação ⚔️',
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
@@ -31,7 +29,7 @@ export default {
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
-    const { users } = getUserOfCommand(client, message);
+    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -68,8 +66,12 @@ export default {
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
               .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setAuthor(
+                message.author.tag,
+                message.author.displayAvatarURL({ dynamic: true })
+              )
               .setDescription(
-                `O usuário ${user} não está mutado no servidor, para mutar user ${prefix}mute <idUser> <motivo> <tempo>`
+                `O usuário ${user} não está mutado no servidor, para mutar use ${prefix}mute @usuário/TAG/ID <motivo> <tempo/2d 5h 30m 12s>`
               )
               .setTitle(`Usuário não está mutado`)
               .setFooter(`ID do usuário : ${user.id}`)
@@ -101,13 +103,18 @@ export default {
       const channelLog = client.channels.cache.get(
         guildIdDatabase.get('channel_log')
       );
-
+      console.log(userMember);
       function messageInviteLog() {
         return new Discord.MessageEmbed()
-          .setTitle(`Usuário desmutado com sucesso`)
-          .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true }))
-          .setThumbnail(Icons.unmute)
-          .setColor(Colors.pink_red);
+          .setTitle(`Usuário ${userMember.user.tag} foi desmutado!`)
+          .setFooter(`ID do usuário: ${userMember.user.id}`)
+          .setAuthor(
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
+          )
+          .setThumbnail(userMember.user.displayAvatarURL({ dynamic: true }))
+          .setColor(Colors.pink_red)
+          .setTimestamp();
       }
       if (channelLog) {
         channelLog.send(message.author, messageInviteLog());

@@ -1,6 +1,4 @@
-import { prefix } from '../../assets/prefix.js';
-
-export function getUserOfCommand(client, message) {
+export function getUserOfCommand(client, message, prefix) {
   const usersInMessage = [];
   const usersRegexRemoveMessage = [];
   const regexForRemoveMention = /(<)|(@!)|(>)/g;
@@ -32,13 +30,14 @@ export function getUserOfCommand(client, message) {
             (u) => u.tag === stringSearchUser[0] || u.id === stringSearchUser[0]
           )
         ) {
-          usersInMessage.push(
-            client.users.cache.find(
-              (u) =>
-                u.tag === stringSearchUser[0] || u.id === stringSearchUser[0]
-            )
+          const userPush = client.users.cache.find(
+            (u) => u.tag === stringSearchUser[0] || u.id === stringSearchUser[0]
           );
-          usersRegexRemoveMessage.push(stringSearchUser[0]);
+
+          if (usersInMessage.indexOf(userPush) === -1) {
+            usersInMessage.push(userPush);
+            usersRegexRemoveMessage.push(stringSearchUser[0]);
+          }
           stringSearchUser.length = 0;
         }
 

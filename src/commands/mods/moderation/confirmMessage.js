@@ -33,7 +33,9 @@ export const confirmMessage = (message, messageAnt) =>
     collector.on('end', async () => {
       if (messageReject) {
         message.channel
-          .send('você não confirmou e o comando expirou')
+          .send(
+            `${message.author} você não confirmou e o comando foi cancelado`
+          )
           .then((msg) => msg.delete({ timeout: 15000 }));
         resolve(false);
       }

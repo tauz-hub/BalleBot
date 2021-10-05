@@ -1,11 +1,10 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'ping',
-  description: `comando de ping para saber a latência, para usar digite ${prefix}ping`,
+  description: `comando de ping para saber a latência, para usar digite <prefix>ping`,
   permissions: ['everyone'],
   aliases: ['pong', 'peng'],
   dm: true,
@@ -18,12 +17,13 @@ export default {
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
           .setThumbnail(Icons.wifi)
-          .setTitle(`🏓Pong! ${message.author.tag}`)
+          .setTitle(`🏓Pong!`)
           .setDescription(
             ` Latency is ${timestampDiff}ms. API latency is ${Math.round(
               client.ws.ping
             )}ms`
           )
+          .setTimestamp()
       );
     });
   },

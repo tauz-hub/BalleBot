@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
@@ -19,7 +18,7 @@ export function helpWithASpecificCommand(fullCommand, message) {
 
   if (fullCommand.aliases) {
     for (let i = 0; i < fullCommand.aliases.length; i++) {
-      stringMarkedAliases[i] = `\`${prefix + fullCommand.aliases[i]}\``;
+      stringMarkedAliases[i] = `\`${fullCommand.aliases[i]}\``;
     }
   }
   for (let i = 0; i < fullCommand.permissions.length; i++) {
@@ -50,11 +49,11 @@ export function helpWithASpecificCommand(fullCommand, message) {
 
 export default {
   name: 'help',
-  description: `${prefix}help <comando> `,
+  description: `<prefix>help <comando> `,
   permissions: ['everyone'],
   aliases: ['ajuda', 'h'],
   category: 'Utility ⛏️',
-  run: ({ message, client, args }) => {
+  run: ({ message, client, args, prefix }) => {
     const commandsDatabase = new client.Database.table('commandsDatabase');
 
     const helpCommand = args[0]?.replace(prefix, '').toLowerCase();
@@ -114,11 +113,11 @@ export default {
             Fui criada para várias funções dentro de um servidor,\n
             Entre elas: Moderação, Cargos, AntiSpam, Forbidden Words, Welcome, Eventos Especiais, Diversão, Economia, e muito mais!\n
             Meus criadores me criaram para ser um bot completo com praticamente tudo que é necessário para um servidor e um pouquinho a mais,
-            trazendo segurança e diversão para o seu servidor\n
+            trazendo segurança e diversão para o seu servidor!\n
             Caso queira suporte com nossos desenvolvedores entre em contato com a equipe responsável no servidor Ballerini:\n
             > **Ballerini:** https://discord.gg/ballerini \n
 
-            **Essas são as categorias e comandos que podem ser usados: **\n\n
+            **Essas são as categorias e comandos que podem ser usados: **\n
             ${getMessageCommands(listTempleteCategories, namesCategories)}`
           )
           .setFooter(

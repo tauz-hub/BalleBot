@@ -3,8 +3,6 @@ import { verifyBannedWords } from './messageVerify/messageVerifyWords.js';
 import Colors from '../../utils/layoutEmbed/colors.js';
 import Icons from '../../utils/layoutEmbed/iconsMessage.js';
 
-const { prefix } = process.env;
-
 export default {
   name: 'message',
   once: false,
@@ -13,12 +11,31 @@ export default {
 
     if (verifyBannedWords(client, message)) return;
 
+    const guildIdDatabase = new client.Database.table(
+      `guild_id_${message.guild.id}`
+    );
+
+    let { prefix } = process.env;
+    if (guildIdDatabase.has(`prefix`)) {
+      prefix = guildIdDatabase.get(`prefix`);
+    }
+
     if (
       message.mentions.users.first() &&
       message.mentions.users.first().id === message.guild.me.id &&
       message.content === `<@!${message.guild.me.id}>`
     ) {
-      message.channel.send(`my prefix ${prefix}`);
+      message.channel.send(
+        message.author,
+        new Discord.MessageEmbed()
+          .setColor(Colors.pink_red)
+          .setTitle(`Meu prefixo no servidor é **\`${prefix}\`**`)
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
+          )
+          .setTimestamp()
+      );
       return;
     }
 
@@ -32,14 +49,11 @@ export default {
         const dmTrueOrFalse = commandToBeExecuted.dm;
         if (message.channel.type === 'dm') {
           if (dmTrueOrFalse) {
-            return commandToBeExecuted.run({ client, message, args });
+            return commandToBeExecuted.run({ client, message, args, prefix });
           }
           return;
         }
 
-        const guildIdDatabase = new client.Database.table(
-          `guild_id_${message.guild.id}`
-        );
         const rolesPermissions = guildIdDatabase.get('admIds') || {
           owner: message.guild.ownerID,
         };
@@ -79,14 +93,14 @@ export default {
           return;
         }
         if (userHasPermission) {
-          commandToBeExecuted.run({ client, message, args });
+          commandToBeExecuted.run({ client, message, args, prefix });
         } else {
           message.channel
             .send(
               message.author,
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
-                .setThumbnail(Icons.padlock)
+                .setThumbnail(Icons.erro)
                 .setTitle(
                   `${message.author.tag} Hey, você não tem permissão :(`
                 )

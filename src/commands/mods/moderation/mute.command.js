@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { confirmMessage } from './confirmMessage.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
@@ -9,12 +8,12 @@ import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'mute',
-  description: `${prefix}mute <userId> <tempo> ou ${prefix}mute @usuário <tempo> ou ${prefix}mute <userTag> <tempo>`,
+  description: `<prefix>mute @usuário/TAG/ID <motivo> <tempo/2d 5h 30m 12s> para mutar usuários`,
   permissions: ['mods'],
   aliases: ['mutar', 'silenciar'],
   category: 'Moderação ⚔️',
   dm: false,
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
@@ -28,6 +27,10 @@ export default {
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setDescription(
               `Ative a permissão de manusear cargos para mim, para que você possa usar o comando mute`
             )
@@ -53,6 +56,10 @@ export default {
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setDescription(
               `Peça a um administrador ver o seu caso, você precisa de permissão para manusear cargos`
             )
@@ -66,7 +73,7 @@ export default {
       return;
     }
 
-    const { users, restOfMessage } = getUserOfCommand(client, message);
+    const { users, restOfMessage } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -75,9 +82,13 @@ export default {
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}mute @usuário <motivo> <tempo>\`\`\``
+              `**Tente usar**\`\`\`${prefix}mute @usuário/TAG/ID <motivo> <tempo/2d 5h 30m 12s>\`\`\``
             )
             .setTimestamp()
         )
@@ -88,18 +99,22 @@ export default {
     const textMessage = restOfMessage || '<Motivo não especificado>';
     const timeValidation = /(\d+d)|(\d+h)|(\d+m)|(\d+s)/gi;
     const reasonMuted =
-      textMessage.replace(timeValidation, '').trim() || '<invalido>';
+      `${textMessage.replace(timeValidation, '').trim()}` || '<invalido>';
 
     const messageAnt = await message.channel.send(
       new Discord.MessageEmbed()
         .setColor(Colors.red)
         .setThumbnail(Icons.mute)
-        /* .setAuthor(`${user.tag}`, user.displayAvatarURL({ dynamic: true })) */
-        .setTitle(`Você está prestes a Mutar os usuários ${users}!`)
-        .setDescription(
-          `**Pelo Motivo de : **\n\n\`\`\`${reasonMuted}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
+        .setAuthor(
+          message.author.tag,
+          message.author.displayAvatarURL({ dynamic: true })
         )
-        /*  .setFooter(`ID do usuário: ${user.id}`) */
+        .setTitle(`Você está prestes a Mutar os usuários:`)
+        .setDescription(
+          `**Usuários: ${users.join(
+            '|'
+          )}**\n**Pelo Motivo de : **\n\n\`\`\`${reasonMuted}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
+        )
         .setTimestamp()
     );
     if (await confirmMessage(message, messageAnt)) {
@@ -117,6 +132,10 @@ export default {
               new Discord.MessageEmbed()
                 .setThumbnail(Icons.erro)
                 .setColor(Colors.pink_red)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(`Hey, você não pode me mutar e isso não é legal :(`)
                 .setTimestamp()
             )
@@ -133,6 +152,10 @@ export default {
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
                 .setThumbnail(Icons.erro)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(
                   `Eu não tenho permissão para mutar o usuário ${user.tag}`
                 )
@@ -151,6 +174,10 @@ export default {
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
                 .setThumbnail(Icons.erro)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(`O usuário ${user.tag} é administrador`)
                 .setDescription(
                   `O usuário ${user} tem um cargo de administrador, o comando mute não funcionará com ele`
@@ -171,6 +198,10 @@ export default {
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
                 .setThumbnail(Icons.erro)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(`Você não tem permissão para mutar o usuário`)
                 .setDescription(
                   `O usuário ${user} está acima ou no mesmo cargo que você, peça a um administrador elevar seu cargo`
@@ -213,7 +244,7 @@ export default {
             muterole = await message.guild.roles.create({
               data: {
                 name: 'muted',
-                color: '#FF0000',
+                color: 'ligth_brown',
                 permissions: [],
               },
             });
@@ -237,7 +268,7 @@ export default {
             dateMuted: new Date(dateForDatabase),
             guildId: message.guild.id,
             roleId: muterole.id,
-            reason: reasonMuted,
+            reason: `Punido por ${message.author.tag} | ${message.author.id} — Motivo: ${reasonMuted}`,
           };
           const guildUndefinedMutated = new client.Database.table(
             `guild_users_mutated_${message.guild.id}`
@@ -281,6 +312,10 @@ export default {
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
               .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+              .setAuthor(
+                message.author.tag,
+                message.author.displayAvatarURL({ dynamic: true })
+              )
               .setTitle(`Usuário mutado com sucesso: ${user.tag}`)
               .setDescription(
                 `**Data final do Mute:** ${inviteMessageDate}\n**Descrição:**\`\`\`${userReasonFullMuted.reason}\`\`\``

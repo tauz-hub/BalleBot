@@ -1,25 +1,23 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import { parseDateForDiscord } from '../../../utils/TimeMessageConversor/parseDateForDiscord.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
+import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'muteinfo',
-  description: `${prefix}muteinfo <userId> ${prefix}muteinfo @usuário ou ${prefix}muteinfo <userTag> para saber o motivo de um membro ter sido banido`,
+  description: `<prefix>muteinfo @usuário/TAG/ID para saber o motivo de membros terem sidos banidos`,
   permissions: ['mods'],
   aliases: ['vermute', 'viewmute', 'muteuser', 'infomute'],
   category: 'Moderação ⚔️',
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
-    const { users } = getUserOfCommand(client, message);
-    //  console.log(users);
-    // console.log('comando muteinfo : ', users);
+    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -27,10 +25,14 @@ export default {
           message.author,
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
-            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setTitle(`Não encontrei o usuário !`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}muteinfo @usuário\`\`\``
+              `**Tente usar**\`\`\`${prefix}muteinfo @usuário/TAG/ID\`\`\``
             )
             .setTimestamp()
         )
@@ -56,8 +58,11 @@ export default {
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-            .setTitle(`Usuário ${user.tag} não está mutado`)
-            .setDescription(`Para mutar use ${prefix}mute @usuário`)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
+            .setTitle(`Usuário ${user.tag} não está mutado!`)
             .setFooter(`ID do usuário: ${user.id}`)
             .setTimestamp()
         );
@@ -84,6 +89,10 @@ export default {
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setTitle(`Informações sobre o mute do usuário: ${user.tag} `)
             .setDescription(
               `**Data final do Mute:** ${dataForMessage}\n**Descrição:**\`\`\`${userMuted.reason}\`\`\``

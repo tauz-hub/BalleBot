@@ -31,19 +31,17 @@ export function setIntervalRemoveMute(client) {
 
         if (channelLog) {
           channelLog.send(
-            userMember.user,
             new Discord.MessageEmbed()
-              .setTitle(
-                `Usuário foi desmutado após o tempo limite : ${user.tag}`
-              )
+              .setTitle(`Usuário foi desmutado após o tempo limite!`)
               .setAuthor(
                 `${user.tag}`,
                 user.displayAvatarURL({ dynamic: true })
               )
               .setDescription(`**Descrição:**\`\`\`${userMuted.reason}\`\`\``)
-              .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+              .setThumbnail(user.displayAvatarURL({ dynamic: true }))
               .setColor(Colors.pink_red)
               .setFooter(`ID do usuário : ${user.id}`)
+              .setTimestamp()
           );
         }
         tableTemporarilyMutated.delete(

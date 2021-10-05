@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
 import { confirmMessage } from './confirmMessage.js';
 import { parseDateForDiscord } from '../../../utils/TimeMessageConversor/parseDateForDiscord.js';
@@ -9,19 +8,19 @@ import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'ban',
-  description: `${prefix}ban <userId> ou ${prefix}ban @usuário ou ${prefix}warn <userTag> `,
+  description: `<prefix>ban @usuário/TAG/ID <motivo> para banir membros`,
   permissions: ['mods'],
   aliases: ['banir'],
   category: 'Moderação ⚔️',
   dm: false,
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
 
-    const { users, restOfMessage } = getUserOfCommand(client, message);
+    const { users, restOfMessage } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -32,7 +31,7 @@ export default {
             .setThumbnail(Icons.erro)
             .setTitle(`Não encontrei o usuário!`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}ban @usuário <motivo>\`\`\``
+              `**Tente usar**\`\`\`${prefix}ban @usuário/TAG/ID <motivo>\`\`\``
             )
             .setFooter(
               `${message.author.tag}`,
@@ -50,12 +49,16 @@ export default {
       new Discord.MessageEmbed()
         .setColor(Colors.red)
         .setThumbnail(Icons.sledgehammer)
-        .setAuthor()
-        .setTitle(`Você está prestes a Banir os usuários ${users}!`)
-        .setDescription(
-          `**Pelo Motivo de:**\n\n\`\`\`${reason}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
+        .setAuthor(
+          message.author.tag,
+          message.author.displayAvatarURL({ dynamic: true })
         )
-        /*   .setFooter(`message.author: ${user.id}`) */
+        .setTitle(`Você está prestes a Banir os usuários:`)
+        .setDescription(
+          `**Usuários: ${users.join(
+            '|'
+          )}** \n**Pelo Motivo de:**\`\`\`${reason}\`\`\` \nPara confirmar clique em ✅\n para cancelar clique em ❎`
+        )
         .setTimestamp()
     );
 
@@ -68,6 +71,10 @@ export default {
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
               .setThumbnail(Icons.erro)
+              .setAuthor(
+                message.author.tag,
+                message.author.displayAvatarURL({ dynamic: true })
+              )
               .setDescription(
                 `Ative a permissão de banir para mim, para que você possa usar o comando`
               )
@@ -91,18 +98,16 @@ export default {
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
               .setThumbnail(Icons.erro)
+              .setAuthor(
+                message.author.tag,
+                message.author.displayAvatarURL({ dynamic: true })
+              )
               .setTitle(`Você não tem permissão para banir os usuários`)
               .setDescription(`Você não pode banir usuários nesse servidor`)
-              .setFooter(
-                `${message.author.tag}`,
-                `${message.author.displayAvatarURL({ dynamic: true })}`
-              )
               .setTimestamp()
           )
           .then((msg) => msg.delete({ timeout: 15000 }));
       }
-
-      /// ///////////////////////////////////////////////////////////////////////
 
       users.forEach(async (user) => {
         if (user.id === message.guild.me.id) {
@@ -112,6 +117,10 @@ export default {
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
                 .setThumbnail(Icons.erro)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(`Hey, você não pode me banir e isso não é legal :(`)
                 .setTimestamp()
             )
@@ -132,6 +141,10 @@ export default {
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
                 .setThumbnail(Icons.erro)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
                 .setTitle(
                   `Eu não tenho permissão para banir o usuário ${user.tag}`
                 )
@@ -164,7 +177,7 @@ export default {
                   .setThumbnail(Icons.sucess)
                   .setTitle(`O usuário ${user.tag} foi banido!`)
                   .setDescription(
-                    `**Data: ${dateForMessage}**\n**Motivo: **\`\`\`${reason}\`\`\`\n**Author:${message.author}**`
+                    `**Punido por: ${message.author}**\n**Data: ${dateForMessage}**\n**Motivo: **\`\`\`${reason}\`\`\``
                   )
                   .setFooter(`ID do usuário: ${user.id}`)
                   .setTimestamp();
@@ -191,7 +204,7 @@ export default {
                       `Você foi banido do servidor **${message.guild.name}**`
                     )
                     .setDescription(
-                      `**Motivo: **\n\`\`\`${reason}\`\`\`\n**Aplicada por: ${message.author}**`
+                      `**Motivo: **\n\`\`\`${reason}\`\`\`\nCaso ache que o banimento foi injusto, **fale com ${message.author}**`
                     )
                     .setFooter(`ID do usuário: ${user.id}`)
                     .setTimestamp()
@@ -202,7 +215,7 @@ export default {
                       message.author,
                       new Discord.MessageEmbed()
                         .setColor(Colors.pink_red)
-                        .setThumbnail(Icons.erro)
+                        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
                         .setDescription(
                           `O usuário ${user} possui a DM fechada, por isso não pude avisá-lo`
                         )

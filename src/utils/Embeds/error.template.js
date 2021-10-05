@@ -1,5 +1,4 @@
 import { MessageEmbed } from 'discord.js';
-import { prefix } from '../../assets/prefix.js';
 import Colors from '../layoutEmbed/colors.js';
 
 export function messageErro(client) {
@@ -10,6 +9,6 @@ export function messageErro(client) {
     .setDescription(
       `**Desculpa, mas não encontrei os cargos marcados.**
       \n**•** Mande no seguinte esquema (o nome do cargo pode ser qualquer um):
-      \n\`${prefix}setAdm @cargoPadawan @cargoMods @cargoStaff\``
+      \nprefix setAdm @cargoPadawan @cargoMods @cargoStaff\``
     );
 }

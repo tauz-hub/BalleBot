@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import { prefix } from '../../../assets/prefix.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
 import { getUserOfCommand } from '../../../utils/getUserMention/getUserOfCommand.js';
@@ -7,27 +6,32 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'unban',
-  description: `${prefix}unban <idUser> ou ${prefix}unban @user para desbanir um usuário`,
+  description: `<prefix>unban @usuário/TAG/ID para desbanir usuários`,
   permissions: ['mods'],
   aliases: ['removeban', 'removerban', 'retirarban', 'desban'],
   category: 'Moderação ⚔️',
-  run: async ({ message, client, args }) => {
+  run: async ({ message, client, args, prefix }) => {
     if (!args[0]) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
     const ban = await message.guild.fetchBans();
-    const { users } = getUserOfCommand(client, message);
+    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!message.member.permissions.has('BAN_MEMBERS')) {
       message.channel.send(
         new Discord.MessageEmbed()
+          .setAuthor(
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
+          )
           .setDescription(
-            'Você não tem permissão de desbanir usuário, fale com um administrador'
+            'Você não tem permissão de desbanir usuários, fale com um administrador'
           )
           .setThumbnail(Icons.erro)
           .setColor(Colors.pink_red)
+          .setTimestamp()
       );
 
       return;
@@ -38,9 +42,15 @@ export default {
           message.author,
           new Discord.MessageEmbed()
             .setColor(Colors.pink_red)
-            .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
             .setTitle(`Não encontrei os usuários!`)
-            .setDescription(`**Tente usar**\`\`\`${prefix}unban <idUser>\`\`\``)
+            .setDescription(
+              `**Tente usar**\`\`\`${prefix}unban <@usuário/TAG/ID>\`\`\``
+            )
             .setTimestamp()
         )
         .then((msg) => msg.delete({ timeout: 15000 }));
@@ -56,8 +66,8 @@ export default {
             new Discord.MessageEmbed()
               .setDescription(`**O usuário ${member} não está banido**`)
               .setAuthor(
-                `${member.tag}`,
-                member.displayAvatarURL({ dynamic: true })
+                message.author.tag,
+                message.author.displayAvatarURL({ dynamic: true })
               )
               .setThumbnail(member.displayAvatarURL({ dynamic: true }))
               .setColor(Colors.pink_red)
@@ -71,12 +81,14 @@ export default {
 
       function messageInviteLog() {
         return new Discord.MessageEmbed()
-          .setTitle(`O usuário foi desbanido com sucesso!`)
+          .setTitle(`O usuário ${member} foi desbanido!`)
+          .setDescription(`**Pelo usuário: ${message.author}**`)
           .setAuthor(
-            `${member.tag}`,
-            member.displayAvatarURL({ dynamic: true })
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
           )
-          .setThumbnail(Icons.sucess)
+          .setFooter(`ID do usuário: ${member.id}`)
+          .setThumbnail(member.displayAvatarURL({ dynamic: true }))
           .setColor(Colors.pink_red);
       }
       const guildIdDatabase = new client.Database.table(
