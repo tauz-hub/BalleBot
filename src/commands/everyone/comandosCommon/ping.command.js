@@ -18,8 +18,12 @@ export default {
           .setColor(Colors.pink_red)
           .setThumbnail(Icons.wifi)
           .setTitle(`🏓Pong!`)
+          .setAuthor(
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
+          )
           .setDescription(
-            ` Latency is ${timestampDiff}ms. API latency is ${Math.round(
+            `A sua latência é ${timestampDiff}ms. A latência da API é ${Math.round(
               client.ws.ping
             )}ms`
           )

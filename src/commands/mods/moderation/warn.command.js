@@ -147,40 +147,15 @@ export default {
             .send(message.author, messageSucess())
             .then((msg) => msg.delete({ timeout: 15000 }));
         }
-        if (guildIdDatabase.has(`user_id_${user.id}`)) {
-          guildIdDatabase.set(`user_id_${user.id}.name`, user.username);
-          guildIdDatabase.set(
-            `user_id_${user.id}.discriminator`,
-            user.discriminator
-          );
-
-          guildIdDatabase.add(`user_id_${user.id}.warnsCount`, 1);
-          guildIdDatabase.push(`user_id_${user.id}.reasons`, reason);
-          guildIdDatabase.push(
-            `user_id_${user.id}.dataReasonsWarns`,
-            new Date()
-          );
-        } else {
-          guildIdDatabase.set(`user_id_${user.id}`, {
-            name: user.username,
-            discriminator: user.discriminator,
-            id: user.id,
-            warnsCount: 1,
-            reasons: [reason],
-            dataReasonsWarns: [new Date()],
-          });
-        }
 
         user
           .send(
             new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
               .setThumbnail(Icons.warn)
-              .setTitle(
-                `Você recebeu um warn do servidor **${message.guild.name}**`
-              )
+              .setTitle(`Você recebeu um warn do servidor **${message.guild}**`)
               .setDescription(
-                `**Motivo: **\n\`\`\`${reason}\`\`\`\n**Para rever seu caso fale com: ${message.author.tag}**`
+                `**Descrição: **\n\`\`\`${reason}\`\`\`\n**Para rever seu caso fale com: ${message.author}**`
               )
               .setFooter(`ID do usuário: ${user.id}`)
               .setTimestamp()
@@ -204,6 +179,21 @@ export default {
               )
               .then((msg) => msg.delete({ timeout: 15000 }))
           );
+        if (guildIdDatabase.has(`user_id_${user.id}`)) {
+          guildIdDatabase.push(`user_id_${user.id}.autor`, message.author.id);
+          guildIdDatabase.push(`user_id_${user.id}.reasons`, reason);
+          guildIdDatabase.push(
+            `user_id_${user.id}.dataReasonsWarns`,
+            new Date()
+          );
+        } else {
+          guildIdDatabase.set(`user_id_${user.id}`, {
+            id: user.id,
+            reasons: [reason],
+            autor: [message.author.id],
+            dataReasonsWarns: [new Date()],
+          });
+        }
       });
     } else {
       await messageAnt.delete();

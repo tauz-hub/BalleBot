@@ -9,7 +9,7 @@ export function messageWarnAndMute(message, client, messageMarked) {
           .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
           .setTitle(`Você enviou uma mensagem suspeita:`)
           .setDescription(
-            `**Espere um moderador rever seu caso, por hora você está silenciado do servidor!**
+            `**Espere um moderador rever seu caso!**
             \n**Essa foi a mensagem:**
             \n ${messageMarked}`
           )
@@ -38,15 +38,6 @@ export function messageWarnAndMute(message, client, messageMarked) {
   );
 
   if (guildIdDatabase.has(`user_id_${message.author.id}`)) {
-    guildIdDatabase.set(
-      `user_id_${message.author.id}.name`,
-      message.author.username
-    );
-    guildIdDatabase.set(
-      `user_id_${message.author.id}.discriminator`,
-      message.author.discriminator
-    );
-    guildIdDatabase.add(`user_id_${message.author.id}.warnsCount`, 1);
     guildIdDatabase.push(
       `user_id_${message.author.id}.reasons`,
       `Palavra/Link proibido : ${messageMarked}`
@@ -55,12 +46,11 @@ export function messageWarnAndMute(message, client, messageMarked) {
       `user_id_${message.author.id}.dataReasonsWarns`,
       new Date()
     );
+    guildIdDatabase.push(`user_id_${message.author.id}.autor`, client.user.id);
   } else {
     guildIdDatabase.set(`user_id_${message.author.id}`, {
-      name: message.author.username,
-      discriminator: message.author.discriminator,
       id: message.author.id,
-      warnsCount: 1,
+      autor: [client.user.id],
       reasons: [`Palavra/Link proibido : ${messageMarked}`],
       dataReasonsWarns: [new Date()],
     });
@@ -84,11 +74,16 @@ export function messageWarnAndMute(message, client, messageMarked) {
             message.author.displayAvatarURL({ dynamic: true })
           )
           .setFooter(`usuário: ${message.author.id}`)
-          .setDescription(`*Essa foi a mensagem:*\n ${messageMarked}`)
-          .addFields({
-            name: 'Mensagem enviada no canal:',
-            value: message.channel,
-          })
+          .addFields(
+            {
+              name: 'Essa foi a mensagem:',
+              value: messageMarked,
+            },
+            {
+              name: 'Mensagem enviada no canal:',
+              value: message.channel,
+            }
+          )
           .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
       );
     }

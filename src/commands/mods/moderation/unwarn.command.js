@@ -95,10 +95,7 @@ export default {
 
         if (isNaN(warnRemove)) {
           if (warnRemove.toLowerCase() === 'all') {
-            guildIdDatabase.delete(`user_id_${user.id}.reasons`);
-            guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
-            guildIdDatabase.set(`user_id_${user.id}.warnsCount`, 0);
-            guildIdDatabase.set(`user_id_${user.id}.reasons`, []);
+            guildIdDatabase.delete(`user_id_${user.id}`);
 
             message.channel
               .send(
@@ -128,6 +125,7 @@ export default {
         const dates = guildIdDatabase.get(
           `user_id_${user.id}.dataReasonsWarns`
         );
+        const autors = guildIdDatabase.get(`user_id_${user.id}.autor`);
 
         if (reasons.length !== 0) {
           if (warnRemove > reasons.length) {
@@ -138,14 +136,17 @@ export default {
 
           const avisoDeleted = reasons[warnRemove];
           const dataDeleted = dates[warnRemove];
+          const autorDeleted = autors[warnRemove];
           reasons.splice(warnRemove, 1);
           dates.splice(warnRemove, 1);
+          autors.splice(warnRemove, 1);
 
           guildIdDatabase.delete(`user_id_${user.id}.reasons`);
           guildIdDatabase.set(`user_id_${user.id}.reasons`, reasons);
           guildIdDatabase.delete(`user_id_${user.id}.dataReasonsWarns`);
           guildIdDatabase.set(`user_id_${user.id}.dataReasonsWarns`, dates);
-          guildIdDatabase.subtract(`user_id_${user.id}.warnsCount`, 1);
+          guildIdDatabase.delete(`user_id_${user.id}.autor`);
+          guildIdDatabase.set(`user_id_${user.id}.autor`, autors);
 
           const channelLog = client.channels.cache.get(
             guildIdDatabase.get('channel_log')
@@ -162,6 +163,7 @@ export default {
                 .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                 .setDescription(
                   `O usuário ${user.tag} teve um aviso removido! \n
+                    **Punido por**: ${autorDeleted}\n
                     **Data:** ${parseDateForDiscord(dataDeleted)}
                     **Motivo** ${avisoDeleted}
                     `
@@ -184,6 +186,7 @@ export default {
                   )
                   .setDescription(
                     `O usuário ${user.tag} teve um aviso removido! \n
+                    **Punido por**: ${autorDeleted}\n
                     **Data:** ${parseDateForDiscord(dataDeleted)}
                     **Motivo** ${avisoDeleted}
                     `

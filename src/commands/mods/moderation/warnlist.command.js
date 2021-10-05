@@ -51,9 +51,9 @@ export default {
         if (warnsUser) {
           const messageCommands = warnsUser.reduce(
             (previous, current, index) =>
-              `${previous}**Aviso ${
-                index + 1
-              }:** \n **Data: ${parseDateForDiscord(
+              `${previous}**Aviso ${index + 1}:** \n**Punido por: <@${
+                myUser.autor[index]
+              }>** \n **Data: ${parseDateForDiscord(
                 myUser.dataReasonsWarns[index]
               )}** \n **Motivo:** \n \`\`\`${current}\`\`\`\n\n`,
             ''
