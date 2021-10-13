@@ -1,6 +1,6 @@
 export const confirmMessage = (message, messageAnt) =>
   new Promise((resolve) => {
-    const reactions = ['✅', '❎'];
+    const reactions = ['✅', '❎', '🕵️‍♀️'];
 
     reactions.forEach((emojiReact) => messageAnt.react(`${emojiReact}`));
 
@@ -23,6 +23,12 @@ export const confirmMessage = (message, messageAnt) =>
           if (message.author.id === userAnt.id) {
             messageReject = false;
             resolve(false);
+          }
+          break;
+        case '🕵️‍♀️':
+          if (message.author.id === userAnt.id) {
+            messageReject = false;
+            resolve('anonimo');
           }
           break;
         default:

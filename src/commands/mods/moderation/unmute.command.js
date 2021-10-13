@@ -5,14 +5,17 @@ import Colors from '../../../utils/layoutEmbed/colors.js';
 
 export default {
   name: 'unmute',
-  description: `<prefix>unmute @usuário/TAG/ID para desmutar usuários`,
+  description: `<prefix>unmute @Usuários/TAGs/Nomes/IDs/Citações para desmutar usuários`,
   permissions: ['mods'],
   aliases: ['tirarmute', 'desmutar', 'desmute'],
   category: 'Moderação ⚔️',
   run: async ({ message, client, args, prefix }) => {
-    if (!args[0]) {
+    const { users } = await getUserOfCommand(client, message, prefix);
+
+    if (!args[0] && !users) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
+      return;
     }
     if (!message.member.hasPermission('MANAGE_ROLES')) {
       message.channel
@@ -29,7 +32,6 @@ export default {
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
-    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -71,7 +73,7 @@ export default {
                 message.author.displayAvatarURL({ dynamic: true })
               )
               .setDescription(
-                `O usuário ${user} não está mutado no servidor, para mutar use ${prefix}mute @usuário/TAG/ID <motivo> <tempo/2d 5h 30m 12s>`
+                `O usuário ${user} não está mutado no servidor, para mutar use ${prefix}mute @Usuários/TAGs/Nomes/IDs/Citações <motivo> <tempo/2d 5h 30m 12s>`
               )
               .setTitle(`Usuário não está mutado`)
               .setFooter(`ID do usuário : ${user.id}`)
@@ -103,7 +105,7 @@ export default {
       const channelLog = client.channels.cache.get(
         guildIdDatabase.get('channel_log')
       );
-      console.log(userMember);
+
       function messageInviteLog() {
         return new Discord.MessageEmbed()
           .setTitle(`Usuário ${userMember.user.tag} foi desmutado!`)

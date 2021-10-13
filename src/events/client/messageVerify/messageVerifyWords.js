@@ -15,13 +15,23 @@ export function verifyBannedWords(client, message) {
   member.roles.cache.map((role) => rolesUser.push(role.id));
 
   if (guildIdDatabase.has('admIds')) {
-    const rolesPermissions = guildIdDatabase.get('admIds');
+    const rolesPermissions = guildIdDatabase.get('admIds') || {};
+    rolesPermissions.owner = message.guild.ownerID;
 
-    const userHasPermission =
-      rolesUser.includes(rolesPermissions.mods) ||
-      rolesUser.includes(rolesPermissions.staff) ||
-      rolesUser.includes(rolesPermissions.padawan) ||
-      message.guild.ownerID === message.author.id;
+    const namesOfRoles = Object.keys(rolesPermissions).reverse();
+
+    const userHasPermission = namesOfRoles.some((nameRole) => {
+      if (rolesPermissions[nameRole]) {
+        if (
+          (rolesUser.indexOf(rolesPermissions[nameRole]) > -1 &&
+            nameRole !== 'everyone') ||
+          message.author.id === rolesPermissions.owner
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
 
     if (!userHasPermission && guildIdDatabase.has('listOfWordsBanned')) {
       const listOfWordsBannedGuild = guildIdDatabase.get('listOfWordsBanned');
@@ -35,7 +45,12 @@ export function verifyBannedWords(client, message) {
         );
 
         if (wordsRegex.test(messageLowerCase)) {
-          const messageMarked = messageLowerCase.replace(wordsRegex, '**$&**');
+          let messageMarked = messageLowerCase.replace(wordsRegex, '-->$&<--');
+          const anexo = message.attachments.map((anex) => anex.url);
+
+          if (anexo.length > 0) {
+            messageMarked += `\n**Arquivo anexado:** ${anexo}`;
+          }
           messageWarnAndMute(message, client, messageMarked);
           return true;
         }

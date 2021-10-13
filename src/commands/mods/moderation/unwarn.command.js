@@ -7,21 +7,18 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'unwarn',
-  description: `<prefix>unwarn @usuário/TAG/ID <aviso1/ 1 / aviso 1> para remover um aviso de usuários`,
+  description: `<prefix>unwarn @Usuários/TAGs/Nomes/IDs/Citações <aviso1/ 1 / aviso 1> para remover um aviso de usuários`,
   permissions: ['mods'],
   aliases: ['removewarn', 'removerwarn', 'retirarwarn', 'deswarn'],
   category: 'Moderação ⚔️',
-  run: ({ message, client, args, prefix }) => {
-    if (!args[0]) {
+  run: async ({ message, client, args, prefix }) => {
+    const { users } = await getUserOfCommand(client, message, prefix);
+
+    if (!args[0] && users.length === 0) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
-    const guildIdDatabase = new client.Database.table(
-      `guild_id_${message.guild.id}`
-    );
-
-    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel.send(
@@ -35,12 +32,13 @@ export default {
           .setThumbnail(Icons.erro)
           .setTitle(`Não encontrei os usuários!`)
           .setDescription(
-            `**Tente usar**\`\`\`${prefix}unwarn @usuário/TAG/ID <aviso 1>\`\`\``
+            `**Tente usar**\`\`\`${prefix}unwarn @Usuários/TAGs/Nomes/IDs/Citações <aviso 1>\`\`\``
           )
           .setTimestamp()
       );
       return;
     }
+
     function messageSelectWarn() {
       return new Discord.MessageEmbed()
         .setColor(Colors.pink_red)
@@ -49,13 +47,15 @@ export default {
           message.author.tag,
           message.author.displayAvatarURL({ dynamic: true })
         )
-        .setTitle(`Selecione um aviso`)
+        .setTitle(`Selecione um aviso!`)
         .setDescription(
-          `Você pode usar ${prefix}unwarn @usuário/TAG/ID aviso 1`
+          `**Você pode usar:\n\`\`${prefix}unwarn @Usuários/TAGs/Nomes/IDs/Citações aviso 1\`\`**`
         )
         .setTimestamp();
     }
-
+    const guildIdDatabase = new client.Database.table(
+      `guild_id_${message.guild.id}`
+    );
     users.forEach(async (user) => {
       const memberUser = client.guilds.cache
         .get(message.guild.id)
@@ -64,25 +64,26 @@ export default {
         memberUser.roles.highest.position >=
         message.member.roles.highest.position
       ) {
-        message.channel
-          .send(
-            message.author,
-            new Discord.MessageEmbed()
-              .setColor(Colors.pink_red)
-              .setThumbnail(Icons.erro)
-              .setAuthor(
-                message.author.tag,
-                message.author.displayAvatarURL({ dynamic: true })
-              )
-              .setTitle(
-                `Você não tem permissão para remover o aviso do usuário ${user.tag}`
-              )
-              .setDescription(
-                `Você não possui um cargo maior que o usuário ${user.tag} para remover os avisos dele`
-              )
-              .setTimestamp()
-          )
-          .then((msg) => msg.delete({ timeout: 15000 }));
+        message.channel.send(
+          message.author,
+          new Discord.MessageEmbed()
+            .setColor(Colors.pink_red)
+            .setThumbnail(Icons.erro)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
+            .setTitle(
+              `Você não tem permissão para remover o aviso do usuário ${user.tag}`
+            )
+            .setDescription(
+              `**Você não possui um cargo maior que o usuário ${user.tag} para remover os avisos dele, fale com um moderador maior**`
+            )
+            .setFooter(`ID do usuário: ${user.id}`)
+            .setTimestamp()
+        );
+
+        return;
       }
       const warnRemove = isNaN(args[args.length - 1])
         ? args[args.length - 1]
@@ -97,24 +98,23 @@ export default {
           if (warnRemove.toLowerCase() === 'all') {
             guildIdDatabase.delete(`user_id_${user.id}`);
 
-            message.channel
-              .send(
-                message.author,
-                new Discord.MessageEmbed()
-                  .setColor(Colors.pink_red)
-                  .setAuthor(
-                    message.author.tag,
-                    message.author.displayAvatarURL({ dynamic: true })
-                  )
-                  .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                  .setTitle(
-                    `Todos os avisos foram removidos do usuário ${user.tag}`
-                  )
-                  .setDescription(`**O usuário não possui mais avisos**`)
-                  .setFooter(`ID do usuário: ${user.id}`)
-                  .setTimestamp()
-              )
-              .then((msg) => msg.delete({ timeout: 15000 }));
+            message.channel.send(
+              message.author,
+              new Discord.MessageEmbed()
+                .setColor(Colors.pink_red)
+                .setAuthor(
+                  message.author.tag,
+                  message.author.displayAvatarURL({ dynamic: true })
+                )
+                .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+                .setTitle(
+                  `Todos os avisos foram removidos do usuário ${user.tag}!`
+                )
+                .setDescription(`**O usuário não possui mais avisos**`)
+                .setFooter(`ID do usuário: ${user.id}`)
+                .setTimestamp()
+            );
+
             return;
           }
 
@@ -165,7 +165,7 @@ export default {
                   `O usuário ${user.tag} teve um aviso removido! \n
                     **Punido por**: ${autorDeleted}\n
                     **Data:** ${parseDateForDiscord(dataDeleted)}
-                    **Motivo** ${avisoDeleted}
+                    **Motivo:**\n ${avisoDeleted}
                     `
                 )
                 .setTitle(
@@ -207,12 +207,14 @@ export default {
         message.author,
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
-          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+          .setThumbnail(user.displayAvatarURL({ dynamic: true }))
           .setAuthor(
             message.author.tag,
             message.author.displayAvatarURL({ dynamic: true })
           )
-
+          .setDescription(
+            `**Para avisar alguém, use o comando \n\`\`${prefix}warn @Usuários/TAGs/Nomes/IDs/Citações <motivo>\`\`**`
+          )
           .setTitle(`O Usuário ${user.tag} não possui avisos`)
           .setTimestamp()
       );

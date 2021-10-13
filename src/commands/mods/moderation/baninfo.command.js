@@ -7,40 +7,51 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'baninfo',
-  description: `<prefix>baninfo @usuário/TAG/ID para saber o motivo de membros terem sidos banidos`,
+  description: `<prefix>baninfo @Usuários/TAGs/Nomes/IDs/Citações para saber o motivo de membros terem sidos banidos`,
   permissions: ['mods'],
   aliases: ['verban', 'viewban', 'banuser', 'infoban'],
   category: 'Moderação ⚔️',
   run: async ({ message, client, args, prefix }) => {
-    if (!args[0]) {
+    const { users } = await getUserOfCommand(client, message, prefix);
+
+    if (!args[0] && !users) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
 
-    const { users } = getUserOfCommand(client, message, prefix);
-
-    users.forEach(async (user) => {
-      let userBanned;
-      if (user) {
-        userBanned = await message.guild
-          .fetchBans()
-          .then((x) => x.get(user.id));
-      }
-
-      if (!userBanned) {
+    if (users === undefined) {
+      message.channel.send(
+        message.author,
+        new Discord.MessageEmbed()
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.erro)
+          .setTitle(`Não encontrei o usuário!`)
+          .setDescription(
+            `**Tente usar**\`\`\`${prefix}baninfo <@Usuários/TAGs/Nomes/IDs/Citações>\`\`\``
+          )
+          .setFooter(
+            `${message.author.tag}`,
+            `${message.author.displayAvatarURL({ dynamic: true })}`
+          )
+          .setTimestamp()
+      );
+      return;
+    }
+    const usersBanneds = await message.guild.fetchBans();
+    users.forEach(async (userBanned) => {
+      if (!usersBanneds.some((x) => x.user.id === userBanned.id)) {
         message.channel.send(
-          message.author,
           new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(Icons.erro)
-            .setTitle(`Não encontrei o usuário!`)
-            .setDescription(
-              `**Tente usar**\`\`\`${prefix}baninfo <@usuário/TAG/ID>\`\`\``
+            .setTitle(`O usuário ${userBanned.tag} não está banido!`)
+            .setAuthor(
+              message.author.tag,
+              message.author.displayAvatarURL({ dynamic: true })
             )
-            .setFooter(
-              `${message.author.tag}`,
-              `${message.author.displayAvatarURL({ dynamic: true })}`
+            .setThumbnail(userBanned.displayAvatarURL({ dynamic: true }))
+            .setColor(Colors.pink_red)
+            .setDescription(
+              `**Para banir usuários use:\n\`\`${prefix}ban @Usuários/TAGs/Nomes/IDs/Citações <motivo>\`\`**`
             )
             .setTimestamp()
         );
@@ -49,6 +60,7 @@ export default {
 
       const dataValidation =
         /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d{3})Z/;
+
       const textDataTest = userBanned.reason;
 
       const userDataBanned = dataValidation.test(textDataTest)
@@ -63,14 +75,14 @@ export default {
         message.author,
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
-          .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+          .setThumbnail(userBanned.displayAvatarURL({ dynamic: true }))
           .setTitle(
-            `Informações sobre o banimento do usuário: ${`${userBanned.user.username}#${userBanned.user.discriminator}`} `
+            `Informações sobre o banimento do usuário: ${userBanned.tag} `
           )
           .setDescription(
-            `**Data: ** ${userDataBanned}\n**Descrição: ** \n\`${descriptionBan}\` \n`
+            `**Data: ** ${userDataBanned}\n**Descrição: ** \n${descriptionBan} \n`
           )
-          .setFooter(`ID do usuário: ${user.id}`)
+          .setFooter(`ID do usuário: ${userBanned.id}`)
           .setTimestamp()
       );
     });

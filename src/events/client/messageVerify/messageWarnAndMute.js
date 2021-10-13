@@ -1,17 +1,17 @@
 import Discord from 'discord.js';
 
-export function messageWarnAndMute(message, client, messageMarked) {
+export async function messageWarnAndMute(message, client, messageMarked) {
   function messageDmAlert() {
     message.author
       .send(
         new Discord.MessageEmbed()
           .setColor('YELLOW')
-          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-          .setTitle(`Você enviou uma mensagem suspeita:`)
+          .setThumbnail(message.guild.iconURL())
+          .setTitle(`Você enviou uma mensagem suspeita em ${message.guild}:`)
           .setDescription(
-            `**Espere um moderador rever seu caso!**
+            `**Um moderador irá rever seu caso!**
             \n**Essa foi a mensagem:**
-            \n ${messageMarked}`
+            ${messageMarked}`
           )
           .addFields({
             name: 'Mensagem enviada no canal:',
@@ -73,7 +73,7 @@ export function messageWarnAndMute(message, client, messageMarked) {
             `${message.author.tag}`,
             message.author.displayAvatarURL({ dynamic: true })
           )
-          .setFooter(`usuário: ${message.author.id}`)
+          .setFooter(`ID do usuário: ${message.author.id}`)
           .addFields(
             {
               name: 'Essa foi a mensagem:',
@@ -88,5 +88,6 @@ export function messageWarnAndMute(message, client, messageMarked) {
       );
     }
   }
+  await message.delete();
   messageDmAlert();
 }

@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
+import imgur from 'imgur';
 import { verifyBannedWords } from './messageVerify/messageVerifyWords.js';
 import Colors from '../../utils/layoutEmbed/colors.js';
-import Icons from '../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'message',
@@ -10,6 +10,19 @@ export default {
     if (message.author.bot) return;
 
     if (verifyBannedWords(client, message)) return;
+    const anexo = message.attachments.map((anex) => anex.url);
+    console.log(anexo[0]);
+
+    imgur.setClientId('548e6d2d5249c7f');
+    imgur.getClientId();
+    imgur
+      .uploadUrl(anexo[0])
+      .then((json) => {
+        message.channel.send(`\`${json.link}\``);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
 
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`
@@ -54,24 +67,46 @@ export default {
           return;
         }
 
-        const rolesPermissions = guildIdDatabase.get('admIds') || {
-          owner: message.guild.ownerID,
-        };
+        const rolesPermissions = guildIdDatabase.get('admIds') || {};
+        rolesPermissions.owner = message.guild.ownerID;
 
         const rolesUser = client.guilds.cache
           .get(message.guild.id)
           .members.cache.get(message.author.id)
           .roles.cache.map((role) => role.id);
 
-        const userHasPermission = commandToBeExecuted.permissions.find(
-          (permissionName) =>
-            rolesUser.includes(rolesPermissions[permissionName]) ||
-            message.guild.ownerID === message.author.id ||
-            message.author.id === '760275647016206347'
-        );
+        const namesOfRoles = Object.keys(rolesPermissions).reverse();
+
+        const userHasPermissionOf = namesOfRoles.find((nameRole) => {
+          if (rolesPermissions[nameRole]) {
+            if (
+              rolesUser.indexOf(rolesPermissions[nameRole]) > -1 ||
+              message.author.id === rolesPermissions.owner
+            ) {
+              return nameRole;
+            }
+          }
+          return false;
+        });
+
+        const userHasPermissionToExecuteCommand =
+          commandToBeExecuted.permissions.some((permissionName) => {
+            const dic = {
+              owner: 4,
+              staff: 3,
+              mods: 2,
+              padawans: 1,
+              everyone: 0,
+            };
+            const positionUser = dic[userHasPermissionOf];
+            const positionPermissionCommand = dic[permissionName];
+
+            if (positionUser >= positionPermissionCommand) return true;
+            return false;
+          });
 
         if (
-          (!userHasPermission ||
+          (!userHasPermissionToExecuteCommand ||
             commandToBeExecuted.name.toLowerCase() !== 'setadm') &&
           !rolesPermissions.staff
         ) {
@@ -92,7 +127,7 @@ export default {
           );
           return;
         }
-        if (userHasPermission) {
+        if (userHasPermissionToExecuteCommand) {
           commandToBeExecuted.run({ client, message, args, prefix });
         } else {
           message.channel
@@ -100,14 +135,11 @@ export default {
               message.author,
               new Discord.MessageEmbed()
                 .setColor(Colors.pink_red)
-                .setThumbnail(Icons.erro)
-                .setTitle(
-                  `${message.author.tag} Hey, você não tem permissão :(`
-                )
+                .setTitle(`Hey, você não tem permissão :(`)
                 .setDescription(
-                  `Apenas ${commandToBeExecuted.permissions.join(
+                  `**Apenas ${commandToBeExecuted.permissions.join(
                     ' **|** '
-                  )} possuem permissão para usar esse comando`
+                  )} possuem permissão para usar esse comando**`
                 )
             )
             .then((msg) => {

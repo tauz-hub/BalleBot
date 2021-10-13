@@ -7,19 +7,20 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'muteinfo',
-  description: `<prefix>muteinfo @usuário/TAG/ID para saber o motivo de membros terem sidos banidos`,
+  description: `<prefix>muteinfo @Usuários/TAGs/Nomes/IDs/Citações para saber o motivo de membros terem sidos banidos`,
   permissions: ['mods'],
   aliases: ['vermute', 'viewmute', 'muteuser', 'infomute'],
   category: 'Moderação ⚔️',
   run: async ({ message, client, args, prefix }) => {
-    if (!args[0]) {
+    const { users } = await getUserOfCommand(client, message, prefix);
+
+    if (!args[0] && users.length === 0) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
-    const { users } = getUserOfCommand(client, message, prefix);
 
-    if (!users) {
+    if (users === undefined) {
       message.channel
         .send(
           message.author,
@@ -32,7 +33,7 @@ export default {
             )
             .setTitle(`Não encontrei o usuário !`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}muteinfo @usuário/TAG/ID\`\`\``
+              `**Tente usar**\`\`\`${prefix}muteinfo @Usuários/TAGs/Nomes/IDs/Citações\`\`\``
             )
             .setTimestamp()
         )

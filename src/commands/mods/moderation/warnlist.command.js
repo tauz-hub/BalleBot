@@ -7,21 +7,18 @@ import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 
 export default {
   name: 'warnlist',
-  description: `<prefix>warnlist @usuário/TAG/ID para ver os warns de um usuários`,
+  description: `<prefix>warnlist @Usuários/TAGs/Nomes/IDs/Citações para ver os warns de um usuários`,
   permissions: ['everyone'],
   aliases: ['warns'],
   category: 'Moderação ⚔️',
-  run: ({ message, client, args, prefix }) => {
-    if (!args[0]) {
+  run: async ({ message, client, args, prefix }) => {
+    const { users } = await getUserOfCommand(client, message, prefix);
+
+    if (!args[0] && users.length === 0) {
       const [command] = message.content.slice(prefix.length).split(/ +/);
       helpWithASpecificCommand(client.Commands.get(command), message);
       return;
     }
-    const guildIdDatabase = new client.Database.table(
-      `guild_id_${message.guild.id}`
-    );
-
-    const { users } = getUserOfCommand(client, message, prefix);
 
     if (!users) {
       message.channel
@@ -36,13 +33,17 @@ export default {
             .setThumbnail(Icons.erro)
             .setTitle(`Não encontrei os usuários!`)
             .setDescription(
-              `**Tente usar**\`\`\`${prefix}warnlist @usuário/TAG/ID\`\`\``
+              `**Tente usar**\`\`\`${prefix}warnlist @Usuários/TAGs/Nomes/IDs/Citações\`\`\``
             )
             .setTimestamp()
         )
         .then((msg) => msg.delete({ timeout: 15000 }));
       return;
     }
+    const guildIdDatabase = new client.Database.table(
+      `guild_id_${message.guild.id}`
+    );
+
     users.forEach(async (user) => {
       if (guildIdDatabase.has(`user_id_${user.id}`)) {
         const myUser = guildIdDatabase.get(`user_id_${user.id}`);
@@ -55,7 +56,7 @@ export default {
                 myUser.autor[index]
               }>** \n **Data: ${parseDateForDiscord(
                 myUser.dataReasonsWarns[index]
-              )}** \n **Motivo:** \n \`\`\`${current}\`\`\`\n\n`,
+              )}** \n **Motivo:** \n ${current}\n\n`,
             ''
           );
 
@@ -71,25 +72,27 @@ export default {
               .setTitle(`Lista de warns do usuário ${user.tag}`)
               .setDescription(messageCommands)
               .setFooter(`ID do usuário: ${user.id}`)
+              .setTimestamp()
           );
           return;
         }
       }
-      message.channel
-        .send(
-          message.author,
-          new Discord.MessageEmbed()
-            .setColor(Colors.pink_red)
-            .setThumbnail(Icons.erro)
-            .setAuthor(
-              message.author.tag,
-              message.author.displayAvatarURL({ dynamic: true })
-            )
-
-            .setTitle(`O Usuário ${user.tag} não possui avisos`)
-            .setTimestamp()
-        )
-        .then((msg) => msg.delete({ timeout: 15000 }));
+      message.channel.send(
+        message.author,
+        new Discord.MessageEmbed()
+          .setColor(Colors.pink_red)
+          .setThumbnail(Icons.erro)
+          .setAuthor(
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
+          )
+          .setFooter(`ID do usuário: ${user.id}`)
+          .setDescription(
+            `**Para avisar alguém, use o comando \n\`\`${prefix}warn @Usuários/TAGs/Nomes/IDs/Citações <motivo>\`\`**`
+          )
+          .setTitle(`O Usuário ${user.tag} não possui avisos`)
+          .setTimestamp()
+      );
     });
   },
 };

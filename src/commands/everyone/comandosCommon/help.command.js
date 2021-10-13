@@ -40,7 +40,7 @@ export function helpWithASpecificCommand(fullCommand, message) {
         }\`\`\n**Cargos necessários para utilizar o comando: **\n> ${
           stringMarkedPermissions.join(' | ') || '`Não especificado`'
         }\n**Sinônimos: **\n> ${
-          stringMarkedAliases.join(' **|** ') ||
+          stringMarkedAliases.join('**|**') ||
           '`<Este comando não possui sinônimos>`'
         }`
       )
