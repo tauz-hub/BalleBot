@@ -39,16 +39,16 @@ export default {
       return;
     }
     const usersBanneds = await message.guild.fetchBans();
-    users.forEach(async (userBanned) => {
-      if (!usersBanneds.some((x) => x.user.id === userBanned.id)) {
+    users.forEach(async (user) => {
+      if (!usersBanneds.some((x) => x.user.id === user.id)) {
         message.channel.send(
           new Discord.MessageEmbed()
-            .setTitle(`O usuário ${userBanned.tag} não está banido!`)
+            .setTitle(`O usuário ${user.tag} não está banido!`)
             .setAuthor(
               message.author.tag,
               message.author.displayAvatarURL({ dynamic: true })
             )
-            .setThumbnail(userBanned.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
             .setColor(Colors.pink_red)
             .setDescription(
               `**Para banir usuários use:\n\`\`${prefix}ban @Usuários/TAGs/Nomes/IDs/Citações <motivo>\`\`**`
@@ -57,7 +57,7 @@ export default {
         );
         return;
       }
-
+      const userBanned = usersBanneds.find((x) => x.user.id === user.id);
       const dataValidation =
         /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d{3})Z/;
 
@@ -75,14 +75,12 @@ export default {
         message.author,
         new Discord.MessageEmbed()
           .setColor(Colors.pink_red)
-          .setThumbnail(userBanned.displayAvatarURL({ dynamic: true }))
-          .setTitle(
-            `Informações sobre o banimento do usuário: ${userBanned.tag} `
-          )
+          .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+          .setTitle(`Informações sobre o banimento do usuário: ${user.tag} `)
           .setDescription(
             `**Data: ** ${userDataBanned}\n**Descrição: ** \n${descriptionBan} \n`
           )
-          .setFooter(`ID do usuário: ${userBanned.id}`)
+          .setFooter(`ID do usuário: ${user.id}`)
           .setTimestamp()
       );
     });

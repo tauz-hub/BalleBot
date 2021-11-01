@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import imgur from 'imgur';
 import { verifyBannedWords } from './messageVerify/messageVerifyWords.js';
 import Colors from '../../utils/layoutEmbed/colors.js';
 
@@ -10,19 +9,6 @@ export default {
     if (message.author.bot) return;
 
     if (verifyBannedWords(client, message)) return;
-    const anexo = message.attachments.map((anex) => anex.url);
-    console.log(anexo[0]);
-
-    imgur.setClientId('548e6d2d5249c7f');
-    imgur.getClientId();
-    imgur
-      .uploadUrl(anexo[0])
-      .then((json) => {
-        message.channel.send(`\`${json.link}\``);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
 
     const guildIdDatabase = new client.Database.table(
       `guild_id_${message.guild.id}`

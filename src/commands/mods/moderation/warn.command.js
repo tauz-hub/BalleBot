@@ -4,6 +4,7 @@ import { confirmMessage } from './confirmMessage.js';
 import { helpWithASpecificCommand } from '../../everyone/comandosCommon/help.command.js';
 import Icons from '../../../utils/layoutEmbed/iconsMessage.js';
 import Colors from '../../../utils/layoutEmbed/colors.js';
+import { uploadImage } from '../../../services/uploadImageImgur/uploadImage.js';
 
 export default {
   name: 'warn',
@@ -46,10 +47,10 @@ export default {
     }
 
     let reason = `${restOfMessage}` || '<Motivo não especificado>';
-    const anexo = message.attachments.map((anex) => anex.url);
+    const anexo = message.attachments.find((anex) => anex.url);
 
-    if (anexo.length > 0) {
-      reason += `\n**Arquivo anexado**: ${anexo}`;
+    if (anexo) {
+      reason += `\n**Arquivo anexado**: ${anexo.url}`;
     }
 
     const messageAnt = await message.channel.send(
@@ -72,6 +73,7 @@ export default {
     );
 
     await confirmMessage(message, messageAnt).then(async (res) => {
+      await messageAnt.delete();
       if (res) {
         const inviteDm = res !== 'anonimo';
         const guildIdDatabase = new client.Database.table(
@@ -81,6 +83,7 @@ export default {
         const channelLog = client.channels.cache.get(
           guildIdDatabase.get('channel_log')
         );
+
         users.forEach(async (user) => {
           const memberUser = client.guilds.cache
             .get(message.guild.id)
@@ -127,6 +130,7 @@ export default {
               .then((msg) => msg.delete({ timeout: 15000 }));
             return;
           }
+
           function messageSucess() {
             return new Discord.MessageEmbed()
               .setColor(Colors.pink_red)
@@ -178,9 +182,17 @@ export default {
                 )
               );
           }
+
+          let reasonOfWarn = `${restOfMessage}` || '<Motivo não especificado>';
+          if (message.attachments.some((anex) => anex.url)) {
+            const urlUpload = await uploadImage(message);
+            if (urlUpload) {
+              reasonOfWarn += `\n**Arquivo anexado**: ${urlUpload}`;
+            }
+          }
           if (guildIdDatabase.has(`user_id_${user.id}`)) {
             guildIdDatabase.push(`user_id_${user.id}.autor`, message.author.id);
-            guildIdDatabase.push(`user_id_${user.id}.reasons`, reason);
+            guildIdDatabase.push(`user_id_${user.id}.reasons`, reasonOfWarn);
             guildIdDatabase.push(
               `user_id_${user.id}.dataReasonsWarns`,
               new Date()
@@ -188,7 +200,7 @@ export default {
           } else {
             guildIdDatabase.set(`user_id_${user.id}`, {
               id: user.id,
-              reasons: [reason],
+              reasons: [reasonOfWarn],
               autor: [message.author.id],
               dataReasonsWarns: [new Date()],
             });

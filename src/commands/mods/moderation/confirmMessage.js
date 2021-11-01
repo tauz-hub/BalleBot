@@ -2,8 +2,11 @@ export const confirmMessage = (message, messageAnt) =>
   new Promise((resolve) => {
     const reactions = ['✅', '❎', '🕵️‍♀️'];
 
-    reactions.forEach((emojiReact) => messageAnt.react(`${emojiReact}`));
-
+    try {
+      reactions.forEach((emojiReact) => messageAnt.react(`${emojiReact}`));
+    } catch (e) {
+      console.log('erro');
+    }
     const filter = (reaction) => reactions.includes(reaction.emoji.name);
 
     const collector = messageAnt.createReactionCollector(filter, {
